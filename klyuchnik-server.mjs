@@ -2,6 +2,7 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { connectN8n, loadConnection } from './n8n-connect.mjs';
+import { listMetrikaGoals } from './metrika.mjs';
 
 const host = '127.0.0.1';
 const port = Number(process.env.KLYUCHNIK_PORT || 8787);
@@ -86,9 +87,14 @@ const server = http.createServer(async (req,res)=>{
   if (req.method==='GET' && path==='/api/semantics/status') {
     json(res,200,{available:Boolean(connection),name:connection?.name??'',url:connection?.base??''});return;
   }
-  if(req.method==='POST'&&(path==='/api/semantics/jobs'||path==='/api/semantics/connect')&&
+  if(req.method==='POST'&&(path==='/api/semantics/jobs'||path==='/api/semantics/connect'||path==='/api/metrika/goals')&&
       (req.headers.origin!==origin||!/^application\/json(?:;|$)/i.test(req.headers['content-type']||''))){
     json(res,403,{message:'Откройте настройки в окне «Ключника».'});return;
+  }
+  if(req.method==='POST'&&path==='/api/metrika/goals'){
+    try{json(res,200,{goals:await listMetrikaGoals(await bodyOf(req))});}
+    catch(error){json(res,400,{message:error.message});}
+    return;
   }
   if(req.method==='POST'&&path==='/api/semantics/connect'){
     if(configuring||busy){json(res,409,{message:'Дождитесь завершения текущей настройки или сбора.'});return;}

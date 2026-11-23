@@ -9,7 +9,18 @@
 :root{color-scheme:light;--bg:#f4f6fb;--paper:#fff;--line:#e2e8f2;--ink:#17243d;--muted:#526480;--blue:#254fd9;--pale:#eaf0ff;--nav:#112039;--green:#14674d;--radius:14px}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",Arial,sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.5}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #7694fe;outline-offset:2px}h1,h2,h3,p{margin:0}h1{font-size:clamp(29px,4vw,40px);line-height:1.13;letter-spacing:-.04em}h2{font-size:20px;letter-spacing:-.02em}h3{font-size:16px}a{color:var(--blue)}.app{min-height:100vh;display:grid;grid-template-columns:235px minmax(0,1fr)}aside{background:var(--nav);color:#eaf1ff;padding:24px 16px;display:flex;flex-direction:column;gap:26px}.brand{display:flex;align-items:center;gap:11px;padding:3px 7px}.brand-symbol{width:37px;height:37px;background:#4165ef;border-radius:11px;display:grid;place-items:center}.brand strong{font-size:21px;letter-spacing:-.035em}.ico{width:19px;height:19px;vertical-align:middle;flex:none}.brand .ico{width:21px;height:21px}.nav{display:grid;gap:5px}.nav button{display:flex;align-items:center;gap:11px;text-align:left;background:none;border:0;color:#c3d0e7;padding:11px 12px;border-radius:9px}.nav button:hover,.nav button[aria-current=page]{background:#263b60;color:white}.nav button[aria-current=page] .ico{color:#9bb4ff}.side-project{border-top:1px solid #344562;padding:18px 8px 0;color:#b8c5dd;font-size:14px}.side-project strong{display:block;color:white;margin-top:3px;overflow-wrap:anywhere}.side-note{margin-top:auto;color:#b8c5dd;padding:12px 8px;font-size:14px}.topbar{min-height:67px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:12px clamp(18px,4vw,52px);gap:10px}.topbar span:first-child{color:var(--muted);overflow-wrap:anywhere}.badge{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;border-radius:25px;padding:5px 11px;background:var(--pale);color:#2645a5;font-size:14px;font-weight:650}.badge.green{background:#e2f5ee;color:var(--green)}.badge.amber{background:#fff0d9;color:#895617}.page{max-width:1450px;margin:auto;padding:30px clamp(18px,4vw,52px) 46px;display:grid;gap:19px}.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}.page-head p{margin-top:8px;color:var(--muted)}.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);min-width:0;box-shadow:0 2px 6px #152b4c04}.pad{padding:21px}.card-head{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.stack{display:grid;gap:13px}.row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.spread{justify-content:space-between}.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid #d5deed;background:#fff;color:#253853;min-height:40px;padding:7px 13px;border-radius:8px;font-weight:650;font-size:14px;text-decoration:none}.btn:hover:not(:disabled){background:#f0f4fc}.btn.primary{background:var(--blue);border-color:var(--blue);color:white}.btn.primary:hover:not(:disabled){background:#1b3fc0}.btn.small{min-height:33px;padding:4px 10px}.muted{color:var(--muted)}.smalltext{font-size:14px}.stage{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:11px;background:#fff;overflow:hidden}.stage span{padding:11px 13px;font-size:14px;color:var(--muted);border-right:1px solid var(--line)}.stage span:last-child{border:0}.stage .current{background:var(--pale);color:#2548b1;font-weight:700}.stage .done{color:var(--green)}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.stat{padding:14px 16px}.stat small{color:var(--muted);font-size:14px}.stat strong{display:block;font-size:24px;line-height:1.3}.workspace{display:grid;grid-template-columns:minmax(210px, .75fr) minmax(0,2fr);gap:15px;align-items:start}.list{padding:9px;display:grid;gap:4px}.list button,.project-entry{border:0;border-radius:8px;background:transparent;color:var(--ink);text-align:left;padding:10px 11px}.list button{display:flex;justify-content:space-between;align-items:center;gap:8px}.list button:hover,.list button.active{background:var(--pale);color:#2446ae}.count{font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;text-align:left}th,td{padding:11px 19px;border-bottom:1px solid var(--line)}th{background:#f7f9fd;color:var(--muted);font-size:14px;font-weight:650}tr:last-child td{border-bottom:0}th:last-child,td:last-child{text-align:right;white-space:nowrap}.search{max-width:240px;padding:6px 10px!important;min-height:36px!important}.files{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:9px}.file{border:1px solid var(--line);background:#f8faff;border-radius:9px;padding:10px;text-align:left;color:var(--ink)}.file:hover:not(:disabled){border-color:#9bb3ff;background:var(--pale)}.file span{display:block;font-size:13px;color:var(--muted);overflow-wrap:anywhere}.empty{padding:28px 20px;color:var(--muted);text-align:center}.form{display:grid;gap:15px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.field{display:grid;gap:5px}.field span{font-size:14px;font-weight:650}input,textarea,select{width:100%;color:var(--ink);background:#fff;border:1px solid #cfd9e8;border-radius:8px;padding:8px 10px;min-height:41px}textarea{resize:vertical;min-height:82px}.notice{padding:12px 15px;border-radius:9px;background:#eaf0ff;font-size:14px;color:#294a9e}.notice.success{background:#e2f5ee;color:var(--green)}.notice.error{background:#ffe9e8;color:#922d2d}.project-entry{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);width:100%}.project-entry:hover{background:#f7f9ff}.project-entry span{display:block;margin-top:3px;color:var(--muted);font-size:14px}.ad{display:grid;gap:9px;border:1px solid var(--line);border-radius:9px;padding:14px;background:#f8faff}.ad strong{color:#2649ae}.pills{display:flex;flex-wrap:wrap;gap:6px}.pill{padding:4px 9px;border-radius:6px;background:#edf2fa;font-size:14px;overflow-wrap:anywhere}.pill.neg{background:#fff0ed;color:#8b4236}.params{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}.params span{display:block;color:var(--muted);font-size:14px}.params strong{overflow-wrap:anywhere}.actionbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}dialog{border:1px solid var(--line);border-radius:14px;width:min(560px,calc(100% - 24px));padding:22px;color:var(--ink);box-shadow:0 15px 65px #12244330}dialog::backdrop{background:#101d39aa}.toast{position:fixed;right:18px;bottom:18px;z-index:5;max-width:min(420px,calc(100% - 36px));padding:12px 16px;background:#12243f;color:white;border-radius:10px;box-shadow:0 5px 25px #12244338}.toast[hidden]{display:none}
 @media(max-width:900px){.app{grid-template-columns:185px minmax(0,1fr)}.workspace{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:640px){.app{display:block}aside{padding:10px 12px;gap:8px}.nav{display:flex;flex-wrap:wrap}.nav button{padding:6px 8px}.side-project,.side-note{display:none}.topbar{min-height:52px}.stage{grid-template-columns:1fr 1fr}.stage span{border-bottom:1px solid var(--line)}.form-grid{grid-template-columns:1fr}.page{padding-top:20px}}
-[hidden]{display:none!important}fieldset.form-grid{min-width:0;margin:0;padding:0;border:0}details>summary{cursor:pointer;font-weight:650}details[open]>summary{margin-bottom:12px}.params .wide{grid-column:1 / -1}.details-list{margin:0;padding-left:22px;overflow-wrap:anywhere}.subsection{border-top:1px solid var(--line);padding-top:12px}.field strong{padding:9px 0}.notice ul{margin:7px 0 0;padding-left:22px;overflow-wrap:anywhere}dialog{max-height:calc(100vh - 24px);overflow:auto}</style>
+[hidden]{display:none!important}fieldset.form-grid{min-width:0;margin:0;padding:0;border:0}details>summary{cursor:pointer;font-weight:650}details[open]>summary{margin-bottom:12px}.params .wide{grid-column:1 / -1}.details-list{margin:0;padding-left:22px;overflow-wrap:anywhere}.subsection{border-top:1px solid var(--line);padding-top:12px}.field strong{padding:9px 0}.notice ul{margin:7px 0 0;padding-left:22px;overflow-wrap:anywhere}dialog{max-height:calc(100vh - 24px);overflow:auto}
+.templates-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:14px}
+.template-form{display:grid;gap:12px}.template-section .wide{grid-column:1/-1}
+.template-section>summary{font-size:17px}.template-section .form-grid+.row{margin-top:12px}
+.template-boxes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:8px 14px}
+.template-boxes label,.goal-row>label{display:flex;align-items:flex-start;gap:9px;font-size:14px}
+.template-boxes input,.goal-row input[type=checkbox]{width:17px;height:17px;min-height:0;margin:3px 0 0;accent-color:var(--blue)}
+.goal-row,.adjustment-row{display:grid;grid-template-columns:2fr minmax(120px,1fr);align-items:end;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.adjustment-row{grid-template-columns:1fr 1fr minmax(120px,.8fr) auto}.goal-row small{display:block;color:var(--muted);font-size:13px}
+#adjustments:not(:empty){margin-bottom:10px}#template-error{overflow-wrap:anywhere}
+@media(max-width:640px){.adjustment-row,.goal-row{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <div class="app">
@@ -151,7 +162,267 @@ function cluster(rows,masks){
   }
   return [...groups,other].filter(group=>group.rows.length).map(group=>({name:group.name,rows:group.rows.sort((a,b)=>b.freq-a.freq||a.phrase.localeCompare(b.phrase,'ru'))}));
 }
-const periods={week:'в неделю',month:'в месяц'};
+const periods={day:'в день',week:'в неделю',month:'в месяц'};
+const placements={
+  search:'Продвижение в поисковой выдаче',shopping:'Товарная галерея на поиске',
+  dynamic:'Динамические места на поиске',directory:'Список организаций, отели и галерея услуг',
+  network:'Рекламная сеть Яндекса',maps:'Яндекс Карты'
+};
+const strategies={clicks:'Максимум кликов',conversions:'Максимум конверсий',manual:'Ручное управление ставками',profit:'Максимум прибыли'};
+const onOff={ '':'По умолчанию',yes:'Включить',no:'Выключить' };
+const templateSections=[
+  ['Объект продвижения',[
+    ['promotedSite','Сайт из шаблона','url'],
+    ['organization','ID организации из Яндекс Бизнеса','text']
+  ]],
+  ['Стратегия и бюджет',[
+    ['strategyKind','Тип стратегии',{ordinary:'Обычная',package:'Пакетная'}],
+    ['strategyType','Стратегия',strategies],
+    ['packageId','ID пакетной стратегии','text'],
+    ['payment','Модель оплаты',{'':'По умолчанию',clicks:'За клики',conversions:'За конверсии'}],
+    ['budgetMode','Бюджет',{project:'Брать из проекта',fixed:'Задать в шаблоне'}],
+    ['budget','Сумма бюджета, ₽','number'],
+    ['period','Период бюджета',{week:'В неделю',month:'В месяц',day:'В день'}],
+    ['spendLimit','Ограничение расхода',{'':'Не задано',averageCpa:'Средняя цена конверсии',averageCpc:'Средняя цена клика',share:'Доля рекламных расходов'}],
+    ['spendTarget','Значение ограничения, ₽ или %','number'],
+    ['maxBid','Максимальная ставка, ₽','number'],
+    ['budgetIncrease','Увеличение бюджета, %','number'],
+    ['minWeeklyBudget','Минимальный недельный бюджет, ₽','number'],
+    ['attribution','Модель атрибуции',{'':'По умолчанию',last:'Последний переход',first:'Первый переход',lastSignificant:'Последний значимый переход',lastDirect:'Последний переход из Директа'}]
+  ]],
+  ['Срок и расписание',[
+    ['startDate','Дата начала','date'],['endDate','Дата окончания','date'],
+    ['scheduleDays','Дни показов',{daily:'Каждый день',weekdays:'Будни',custom:'Выбрать дни'}],
+    ['timeFrom','С','time'],['timeTo','До','time'],
+    ['timeZone','Часовой пояс','text']
+  ]],
+  ['Минус-фразы, URL и запреты',[
+    ['negative','Общие минус-фразы','area'],['utm','Параметры URL / UTM','area'],
+    ['blockedSites','Запрещённые площадки','area'],['blockedIps','Запрещённые IP-адреса','area'],
+    ['priority','Приоритизация объявлений',{'':'По умолчанию',performance:'С лучшим сочетанием показателей',phrase:'По фразе, наиболее близкой к запросу'}]
+  ]],
+  ['Дополнительные настройки',[
+    ['siteMonitoring','Мониторинг сайта',onOff],['callTracking','Коллтрекинг',onOff],
+    ['autoRecommendations','Автоматически применять рекомендации',onOff],['personalization','Персонализация объявлений',onOff],
+    ['excludedText','Фразы-исключения персонализации','area'],['pinnedText','Закреплённые фразы персонализации','area'],
+    ['yandexDiscounts','Персональные скидки от Яндекса',onOff],['experiments','ID A/B-экспериментов','area'],
+    ['email','Почта для уведомлений','email']
+  ]]
+];
+const weekdayLabels=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+function emptyTemplate(){
+  return {name:'',settings:{placements:['search'],strategyKind:'ordinary',strategyType:'clicks',
+    budgetMode:'project',period:'month',scheduleDays:'daily',timeFrom:'00:00',timeTo:'23:59',
+    customDays:[],goals:[],counterIds:[],adjustments:[]}};
+}
+const templates=()=>state.templates??[];
+function templateSelect(label,options,name,current){
+  return '<label class="field"><span>'+label+'</span><select name="'+name+'">'+
+    Object.entries(options).map(([id,title])=>'<option value="'+esc(id)+'"'+(id===current?' selected':'')+'>'+esc(title)+'</option>').join('')+'</select></label>';
+}
+function templateField([key,label,type],values){
+  const value=values[key]??'';
+  if(typeof type==='object')return templateSelect(label,type,key,value);
+  if(type==='area')return '<label class="field wide"><span>'+label+'</span><textarea name="'+key+'" rows="3" maxlength="16000">'+esc(value)+'</textarea></label>';
+  return field(key,label,value,type==='number'?'type="number" min="0" max="1000000000" step="0.01"':'type="'+type+'" maxlength="500"');
+}
+function listValues(value){return [...new Set(String(value??'').split(/[\n,;]+/).map(trim).filter(Boolean))];}
+function renderTemplateList(){
+  const cards=templates().map(item=>'<article class="card pad stack"><div class="row spread"><h2>'+esc(item.name)+'</h2>'+
+    '<span class="badge">'+esc(item.settings.strategyKind==='package'?'Пакетная стратегия':strategies[item.settings.strategyType])+'</span></div>'+
+    '<p class="muted smalltext">'+esc(item.settings.placements.map(value=>placements[value]).join(' · '))+'</p>'+
+    '<div class="row">'+templateButton('Редактировать','template-edit',item.id)+templateButton('Дублировать','template-copy',item.id)+'</div></article>').join('');
+  return head('Шаблоны','Настройки уровня кампании',button('Создать шаблон','template-new',{primary:true,icon:'plus'}))+
+    (cards?'<div class="templates-grid">'+cards+'</div>':'<section class="card empty">Создайте первый шаблон. Его можно будет выбрать при подготовке кампании.</section>');
+}
+function templateButton(label,action,id){
+  return '<button class="btn small" type="button" data-action="'+action+'" data-id="'+esc(id)+'">'+label+'</button>';
+}
+let templateEditing=null, goalCatalog=[], goalsUpdatedAt='';
+function boxes(name,options,selected){
+  return '<div class="template-boxes">'+Object.entries(options).map(([id,label])=>
+    '<label><input type="checkbox" name="'+name+'" value="'+esc(id)+'"'+(selected.includes(id)?' checked':'')+'>'+esc(label)+'</label>').join('')+'</div>';
+}
+const adjustmentTypes={region:'Регион',demographic:'Пол и возраст',device:'Устройство',audience:'Аудитория',other:'Другое'};
+const genders={any:'Любой пол',male:'Только мужчины',female:'Только женщины'};
+const ages={any:'Любой возраст',under18:'Младше 18',age18to24:'18–24',age25to34:'25–34',age35to44:'35–44',age45to54:'45–54',age55plus:'55 и старше'};
+function adjustmentRow(item={}){
+  const type=item.type??'region', demographic=type==='demographic';
+  return '<div class="adjustment-row">'+templateSelect('Условие',adjustmentTypes,'adjustmentType',type)+
+    '<div class="adjustment-detail"'+(demographic?' hidden':'')+'>'+field('adjustmentValue','Значение',item.value??'','maxlength="100" placeholder="Например, Москва"')+'</div>'+
+    '<div class="adjustment-demographic form-grid"'+(demographic?'':' hidden')+'>'+
+    templateSelect('Пол',genders,'adjustmentGender',item.gender??'any')+templateSelect('Возраст',ages,'adjustmentAge',item.age??'any')+'</div>'+
+    field('adjustmentPercent','Корректировка, %',item.percent??'','type="number" min="-100" step="1"')+
+    '<button type="button" class="btn small remove-adjustment" aria-label="Убрать корректировку">Убрать</button></div>';
+}
+function adjustmentLabel(rule){
+  const condition=rule.type==='demographic'?[genders[rule.gender],ages[rule.age]].join(' · '):rule.value;
+  return adjustmentTypes[rule.type]+' · '+condition+' · '+rule.percent+'%';
+}
+function goalsMarkup(goals,selected){
+  if(!goals.length)return '<p class="muted smalltext">Выберите цели после загрузки выбранных счётчиков.</p>';
+  const items=new Map(selected.map(goal=>[goal.counterId+':'+goal.id,goal]));
+  return goals.map(goal=>{
+    const key=goal.counterId+':'+goal.id, current=items.get(key);
+    return '<div class="goal-row"><label><input type="checkbox" name="goalId" value="'+esc(key)+'"'+(current?' checked':'')+
+      '><span>'+esc(goal.name)+'<small>Счётчик '+esc(goal.counterId)+' · цель '+esc(goal.id)+(goal.unavailable?' · не найдена при обновлении':'')+'</small></span></label>'+
+      field('price:'+key,'Цена цели, ₽',current?.price??'','type="number" min="0" max="1000000000" step="0.01"')+'</div>';
+  }).join('');
+}
+function templateEditor(){
+  const t=templateEditing, settings=t.settings;
+  const cards=templateSections.map(([title,fields],index)=>
+    '<details class="card pad template-section"'+(index===1?' open':'')+'><summary>'+title+'</summary><div class="form-grid">'+
+      fields.map(f=>templateField(f,settings)).join('')+
+      (title==='Срок и расписание'?'<div class="wide">'+boxes('customDays',Object.fromEntries(weekdayLabels.map((label,i)=>[i,label])),settings.customDays)+'</div>':'')+
+    '</div></details>');
+  const goalCard='<details class="card pad template-section"><summary>Яндекс Метрика и цели</summary>'+
+    '<div class="form-grid">'+field('counterIds','ID счётчиков через запятую',settings.counterIds.join(', '),'maxlength="160"')+
+    field('metrikaToken','OAuth-токен Метрики','','type="password" autocomplete="off"')+'</div>'+
+    '<div class="row">'+button('Обновить цели','template-goals',{small:true,disabled:!bridgeReady})+
+    '<p class="muted smalltext">Токен используется для чтения целей и не сохраняется.</p></div>'+
+    '<p id="template-goals-status" class="muted smalltext" role="status">'+
+    (goalsUpdatedAt?'Последняя загрузка: '+esc(new Date(goalsUpdatedAt).toLocaleString('ru-RU')):'')+'</p><div id="template-goals-list">'+goalsMarkup(goalCatalog,settings.goals)+'</div></details>';
+  return head(t.id?'Редактирование шаблона':'Новый шаблон','Уровень кампании',button('К шаблонам','nav-templates'))+
+    '<form class="template-form" id="template-form"><section class="card pad">'+field('name','Название шаблона',t.name,'required maxlength="100"')+'</section>'+
+    cards[0]+'<details class="card pad template-section" open><summary>Места показа</summary>'+
+    boxes('placements',placements,settings.placements)+'</details>'+cards[1]+goalCard+cards.slice(2).join('')+
+    '<details class="card pad template-section"><summary>Корректировки</summary><div id="adjustments">'+
+    settings.adjustments.map(adjustmentRow).join('')+'</div>'+button('Добавить корректировку','template-adjustment',{small:true})+'</details>'+
+    '<p id="template-error" class="notice error" role="alert" hidden></p>'+
+    '<div class="actionbar"><button class="btn primary" type="submit">Сохранить шаблон</button></div></form>';
+}
+function openTemplate(item,copy=false){
+  templateEditing=item?structuredClone(item):emptyTemplate();
+  if(copy){
+    templateEditing.name=(item.name.slice(0,93)+' — копия').slice(0,100);
+    delete templateEditing.id;
+  }
+  goalCatalog=templateEditing.settings.goals.map(({price,...goal})=>goal);
+  goalsUpdatedAt=templateEditing.settings.goalsUpdatedAt??'';
+  changePage('template');
+}
+function chosenGoals(data){
+  return data.getAll('goalId').map(key=>{
+    const goal=goalCatalog.find(item=>item.counterId+':'+item.id===key);
+    if(!goal)throw Error('Выберите цель из загруженного списка.');
+    return {counterId:goal.counterId,id:goal.id,name:goal.name,price:trim(data.get('price:'+key))};
+  });
+}
+function showTemplateError(message){
+  const error=q('#template-error');
+  error.textContent=message;error.hidden=!message;
+  if(message)error.scrollIntoView({block:'nearest'});
+}
+function collectTemplate(data){
+  const fields=templateSections.flatMap(([,items])=>items);
+  const settings=Object.fromEntries(fields.map(([key])=>[key,trim(data.get(key))]));
+  settings.placements=data.getAll('placements');
+  settings.counterIds=listValues(data.get('counterIds'));
+  settings.goals=chosenGoals(data);
+  settings.goalsUpdatedAt=goalsUpdatedAt;
+  settings.customDays=data.getAll('customDays');
+  const adjustmentValues=data.getAll('adjustmentValue'), percents=data.getAll('adjustmentPercent');
+  const adjustmentGenders=data.getAll('adjustmentGender'), adjustmentAges=data.getAll('adjustmentAge');
+  settings.adjustments=data.getAll('adjustmentType').map((type,index)=>({
+    type,value:type==='demographic'?'':trim(adjustmentValues[index]),percent:trim(percents[index]),
+    ...(type==='demographic'?{gender:adjustmentGenders[index],age:adjustmentAges[index]}:{})
+  })).filter(rule=>rule.type==='demographic'||rule.value||rule.percent);
+  if(!settings.placements.length)throw Error('Выберите хотя бы одно место показа.');
+  if(settings.strategyKind==='package'&&!/^\d{1,15}$/.test(settings.packageId))throw Error('Укажите числовой ID пакетной стратегии.');
+  if(settings.budgetMode==='fixed'&&!(Number(settings.budget)>0))throw Error('Укажите сумму бюджета шаблона.');
+  if(settings.startDate&&settings.endDate&&settings.endDate<settings.startDate)throw Error('Дата окончания предшествует дате начала.');
+  if(!settings.timeFrom||!settings.timeTo||settings.timeFrom>=settings.timeTo)throw Error('Укажите допустимое время начала и окончания показов.');
+  if(settings.scheduleDays==='custom'&&!settings.customDays.length)throw Error('Выберите дни показов.');
+  if(settings.counterIds.length>10||settings.counterIds.some(id=>!/^\d{1,15}$/.test(id)))throw Error('Укажите до десяти числовых ID счётчиков.');
+  if(settings.goals.some(goal=>!settings.counterIds.includes(goal.counterId)||
+     goalCatalog.some(item=>item.unavailable&&item.id===goal.id&&item.counterId===goal.counterId)))throw Error('Проверьте выбранные цели и их счётчики.');
+  if(settings.adjustments.some(rule=>rule.percent===''||(rule.type==='demographic'?rule.gender==='any'&&rule.age==='any':!rule.value)))throw Error('Заполните условие и процент каждой корректировки.');
+  if(settings.promotedSite&&!allowedUrl(settings.promotedSite))throw Error('Укажите адрес сайта с http:// или https://.');
+  return settings;
+}
+async function refreshTemplateGoals(){
+  const form=q('#template-form'), status=q('#template-goals-status'), button=form.querySelector('[data-action="template-goals"]');
+  const data=new FormData(form), token=trim(data.get('metrikaToken')), counters=listValues(data.get('counterIds'));
+  if(!token||!counters.length||counters.length>10||counters.some(id=>!/^\d{1,15}$/.test(id))){
+    status.textContent='Укажите OAuth-токен и от одного до десяти числовых ID счётчиков.';return;
+  }
+  button.disabled=true;status.textContent='Загружаем цели…';
+  try{
+    const responses=await Promise.all(counters.map(counterId=>apiRequest('/api/metrika/goals',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({counterId,token})
+    })));
+    if(q('#template-form')!==form)return;
+    const selected=chosenGoals(new FormData(form));
+    const received=responses.flatMap(result=>result.goals);
+    const availableCounters=new Set(counters);
+    goalsUpdatedAt=new Date().toISOString();
+    goalCatalog=[...received,...selected.filter(goal=>!received.some(item=>item.counterId===goal.counterId&&item.id===goal.id))
+      .map(goal=>({...goal,unavailable:availableCounters.has(goal.counterId)}))];
+    q('#template-goals-list').innerHTML=goalsMarkup(goalCatalog,selected);
+    status.textContent='Получено целей: '+number(received.length)+'.';
+  }catch(error){status.textContent=error.message;}
+  finally{button.disabled=false;}
+}
+function applyTemplate(p,item){
+  const snapshot=item?structuredClone(item):null;
+  const brief={...campaignBrief(p,p.campaign),campaignTemplate:snapshot};
+  p.campaign=draft(p,p.campaign,brief);
+  selectedGroup=0;save();changePage('campaign');
+}
+function chooseTemplate(p){
+  if(!templates().length){if(p.campaign){notify('Создайте первый шаблон во вкладке «Шаблоны».');return;}applyTemplate(p,null);return;}
+  const options=Object.fromEntries([['','Без шаблона'],...templates().map(item=>[item.id,item.name])]);
+  showDialog('Шаблон кампании',templateSelect('Выбрать шаблон',options,'templateId',p.campaign?.brief?.campaignTemplate?.id??''),
+    p.campaign?'Применить':'Подготовить кампанию',data=>applyTemplate(p,templates().find(item=>item.id===data.get('templateId'))));
+}
+function templateSettings(brief,settings){
+  const t=brief.campaignTemplate?.settings;
+  if(!t)return;
+  settings.campaignTemplate={id:brief.campaignTemplate.id,name:brief.campaignTemplate.name};
+  settings.templateSettings=structuredClone(t);
+  settings.placement=t.placements.map(id=>placements[id]).join(' · ');
+  settings.strategy=t.strategyKind==='package'?'Пакетная стратегия · '+t.packageId:strategies[t.strategyType];
+  if(t.budgetMode==='fixed'){settings.budget=Number(t.budget);settings.period=t.period;}
+  const days=t.scheduleDays==='custom'?t.customDays.map(i=>weekdayLabels[i]).join(', '):t.scheduleDays==='weekdays'?'Будни':'Каждый день';
+  settings.schedule=days+' · '+t.timeFrom+'–'+t.timeTo+(t.timeZone?' · '+t.timeZone:'');
+  settings.negative=listValues(t.negative);
+  settings.utm=t.utm;
+  settings.site=t.promotedSite||brief.site;
+  settings.counter=t.counterIds.join(', ');
+  settings.goal=t.goals.map(goal=>goal.name).join(', ');
+}
+function templateFromCampaign(c){
+  const item=emptyTemplate();
+  const current=c.settings;
+  if(current?.templateSettings){
+    item.settings=structuredClone(current.templateSettings);
+  }else if(current){
+    const times=current.schedule.match(/(\d{2}:\d{2})[–-](\d{2}:\d{2})/);
+    Object.assign(item.settings,{
+      strategyType:current.strategy==='Максимум конверсий'?'conversions':'clicks',
+      budgetMode:current.budget?'fixed':'project',budget:current.budget||'',period:current.period,
+      scheduleDays:/будни/i.test(current.schedule)?'weekdays':'daily',
+      timeFrom:times?.[1]??'00:00',timeTo:times?.[2]??'23:59',
+      negative:current.negative.join('\n'),utm:current.utm,
+      counterIds:listValues(current.counter)
+    });
+  }
+  return item;
+}
+function templateSummary(c){
+  const t=c.settings?.templateSettings;
+  if(!t)return '';
+  const keys=['promotedSite','organization','strategyKind','strategyType','packageId','payment','spendLimit','spendTarget','maxBid',
+    'budgetIncrease','minWeeklyBudget','attribution','startDate','endDate','blockedSites','blockedIps','priority','siteMonitoring',
+    'callTracking','autoRecommendations','personalization','excludedText','pinnedText','yandexDiscounts','experiments','email'];
+  const values=templateSections.flatMap(([,items])=>items).filter(([key])=>keys.includes(key)&&String(t[key]??'')!=='')
+    .map(([key,title,kind])=>'<div><span>'+title+'</span><strong>'+esc(typeof kind==='object'?kind[t[key]]:t[key])+'</strong></div>');
+  for(const goal of t.goals)values.push('<div><span>Цель Метрики</span><strong>'+esc(goal.name+' · '+(goal.price?goal.price+' ₽':'цена не задана'))+'</strong></div>');
+  for(const rule of t.adjustments)values.push('<div><span>Корректировка</span><strong>'+esc(adjustmentLabel(rule))+'</strong></div>');
+  return '<details class="card pad"><summary>Параметры шаблона «'+esc(c.settings.campaignTemplate.name)+'»</summary><div class="params">'+values.join('')+'</div></details>';
+}
+
 function defaultBrief(p){
   return {budget:p.budget||'',period:'month',counter:'',goal:'',instruction:'',site:p.url||'',optimize:'auto'};
 }
@@ -173,7 +444,7 @@ function decodeWish(line){
     ['добавить в текст',/^(?:в объявлениях\s+)?(?:упомяни(?:те)?|добавь(?:те)? в (?:текст|объявлени[яе]))\s+(.+)$/i],
     ['убрать из текста',/^(?:в объявлениях\s+)?(?:не обещай(?:те)?|не упоминай(?:те)?|убери(?:те)?(?: из (?:текста|объявлений))?)\s+(.+)$/i],
     ['расписание',/^(?:(?:показы|показывай(?:те)?|показывать)(?:\s+рекламу)?\s+)?(?:только\s+)?((?:по\s+)?будням|по будням|будни|каждый день|круглосуточно)(.*)$/i],
-    ['бюджет',/^(?:бюджет\s+)?([\d ]+\s*(?:₽|рублей)?\s*в (?:неделю|месяц))$/i],
+    ['бюджет',/^(?:бюджет\s+)?([\d ]+\s*(?:₽|рублей)?\s*в (?:день|неделю|месяц))$/i],
     ['регион',/^(?:гео|регион|география)\s+(.+)$/i],
     ['заявки',/^(?:(?:хочу|нужны|цель —)\s+заявки|(?:оптимизируй(?:те)?|оптимизация)\s+(?:под|на|для)\s+(?:заявок|заявки|конверсии))$/i]
   ];
@@ -195,11 +466,17 @@ function buildBrief(p,brief){
     budget:brief.budget,period:brief.period,schedule:'Каждый день, круглосуточно',
     counter:brief.counter,goal:brief.goal,negative:[],utm:'utm_source=yandex&utm_medium=cpc&utm_campaign={campaign_id}&utm_content={ad_id}&utm_term={keyword}'};
   const problems=[], split=[], add=[], remove=[];
+  const fromTemplate=brief.campaignTemplate?.settings;
+  if(fromTemplate)templateSettings(brief,settings);
   let wantsLeads=brief.optimize==='leads';
   for(const line of wishParts(brief.instruction)){
     const command=decodeWish(line);
     if(!command){problems.push('Не удалось применить пожелание «'+line+'». Уточните или удалите его.');continue;}
     const [key,input]=command;
+    if(fromTemplate&&['расписание','минус-фразы','utm','заявки'].includes(key)){
+      problems.push('Настройка «'+key+'» задана шаблоном. Измените шаблон и примените его снова.');
+      continue;
+    }
     const value=input.replace(/^[«“"]|[»”"]$/g,'').trim();
     switch(key){
       case 'расписание': {
@@ -219,8 +496,8 @@ function buildBrief(p,brief){
       case 'utm': settings.utm=value.trim().replace(/^\?/,'');break;
       case 'заявки': wantsLeads=true;break;
       case 'бюджет': {
-        const amount=value.match(/^([\d\s]+)\s*(?:₽|рублей)?\s*(в неделю|в месяц)$/i);
-        if(!amount||Number(amount[1].replace(/\s/g,''))!==brief.budget||amount[2].toLowerCase()!==periods[brief.period]){
+        const amount=value.match(/^([\d\s]+)\s*(?:₽|рублей)?\s*(в день|в неделю|в месяц)$/i);
+        if(!amount||Number(amount[1].replace(/\s/g,''))!==settings.budget||amount[2].toLowerCase()!==periods[settings.period]){
           problems.push('Бюджет в задании («'+value+'») должен совпадать с полем бюджета и выбранным периодом.');
         }
         break;
@@ -234,6 +511,11 @@ function buildBrief(p,brief){
   }
   settings.negative=[...new Set(settings.negative)];
   if(!settings.budget)problems.push('Укажите бюджет и период.');
+  if(fromTemplate){
+    const needsGoal=fromTemplate.strategyKind==='ordinary'&&['conversions','profit'].includes(fromTemplate.strategyType)&&!fromTemplate.goals.length;
+    if(needsGoal)problems.push('Добавьте цель Метрики в шаблон для выбранной стратегии и примените его снова.');
+    return {settings,problems,split,add,remove,needsGoal};
+  }
   wantsLeads=brief.optimize!=='clicks'&&(wantsLeads||Boolean(brief.counter||brief.goal));
   if(wantsLeads){
     settings.strategy='Максимум конверсий';
@@ -247,15 +529,18 @@ function buildBrief(p,brief){
 function editCampaignInputs(p){
   const c=p.campaign;
   const brief=campaignBrief(p,c);
+  const fixed=brief.campaignTemplate?.settings;
+  if(fixed?.budgetMode==='fixed'&&fixed.promotedSite){notify('Бюджет и сайт заданы применённым шаблоном.');return;}
   const periodsMarkup=Object.entries(periods).map(([id,label])=>'<option value="'+id+'"'+(id===brief.period?' selected':'')+'>'+label+'</option>').join('');
   showDialog('Данные для кампании',
+    (fixed?.budgetMode==='fixed'?'<p class="muted smalltext">Бюджет зафиксирован шаблоном.</p>':
     '<div class="form-grid">'+field('budget','Бюджет, ₽',brief.budget,'type="number" min="1" max="1000000000"')+
-    '<label class="field"><span>Период бюджета</span><select name="period">'+periodsMarkup+'</select></label></div>'+
-    field('site','Посадочная страница',brief.site,'type="url" maxlength="500"'),
+    '<label class="field"><span>Период бюджета</span><select name="period">'+periodsMarkup+'</select></label></div>')+
+    (fixed?.promotedSite?'<p class="muted smalltext">Сайт задан шаблоном.</p>':field('site','Посадочная страница',brief.site,'type="url" maxlength="500"')),
     'Сохранить',data=>{
-      const site=trim(data.get('site'));
+      const site=data.has('site')?trim(data.get('site')):brief.site;
       if(site&&!allowedUrl(site)){notify('Укажите ссылку с http:// или https://.');return false;}
-      reviseDraft(p,{budget:Number(data.get('budget')),period:data.get('period'),site});
+      reviseDraft(p,{budget:data.has('budget')?Number(data.get('budget')):brief.budget,period:data.get('period')??brief.period,site});
     });
 }
 function editGoal(p){
@@ -273,9 +558,9 @@ function changeSummary(before,after){
   if(!before)return [];
   const changes=[];
   const oldSettings=before.settings??{};
-  const titles={strategy:'Стратегия',site:'Посадочная страница',budget:'Бюджет',period:'Период бюджета',schedule:'Расписание',negative:'Общие минус-фразы',counter:'Счётчик Метрики',goal:'Цель Метрики',utm:'UTM'};
+  const titles={campaignTemplate:'Шаблон кампании',strategy:'Стратегия',site:'Посадочная страница',budget:'Бюджет',period:'Период бюджета',schedule:'Расписание',negative:'Общие минус-фразы',counter:'Счётчик Метрики',goal:'Цель Метрики',utm:'UTM'};
   for(const [key,label] of Object.entries(titles)){
-    if(JSON.stringify(oldSettings[key])!==JSON.stringify(after.settings[key]))changes.push('Кампания · '+label+' — '+(key==='period'?periods[after.settings[key]]:key==='budget'?after.settings[key]||'Уточнить':[].concat(after.settings[key]).filter(Boolean).join(', ')||'Не задано'));
+    if(JSON.stringify(oldSettings[key])!==JSON.stringify(after.settings[key]))changes.push('Кампания · '+label+' — '+(key==='campaignTemplate'?after.settings[key]?.name??'Без шаблона':key==='period'?periods[after.settings[key]]:key==='budget'?after.settings[key]||'Уточнить':[].concat(after.settings[key]).filter(Boolean).join(', ')||'Не задано'));
   }
   const oldGroups=new Map(before.groups.map(group=>[group.name,group]));
   for(const group of after.groups){
@@ -293,11 +578,11 @@ function campaignBasis(c){return JSON.parse(JSON.stringify({settings:c.settings,
 function draft(p,old,brief=campaignBrief(p,old)){
   const {settings,problems,split,add,remove,needsGoal}=buildBrief(p,brief);
   const oldGroups=new Map(old?.groups.map(group=>[group.name,group])??[]);
-  const oldSite=campaignBrief(p,old).site;
+  const oldSite=old?.settings?.site??campaignBrief(p,old).site;
   const adFields=(saved,name)=>({
     title:saved?.textBasis?.title??saved?.title??name,
     description:saved?.textBasis?.description??saved?.description??p.niche,
-    url:saved?.url&&saved.url!==oldSite?saved.url:brief.site
+    url:saved?.url&&saved.url!==oldSite?saved.url:settings.site
   });
   const clusterNames=new Set(p.clusters.map(group=>group.name));
   const splitPhrases=new Set(old?.groups.flatMap(group=>group.splitFrom??(clusterNames.has(group.name)?[]:group.keywords))??[]);
@@ -359,9 +644,9 @@ function shell(){
   button.disabled=!bridgeReady;
   button.textContent=agentAvailable?'Настройки n8n':bridgeReady?'Подключить n8n':'Демо-режим';
   q('#brand-symbol').innerHTML=icon('key');
-  q('#nav').innerHTML=[['projects','Проекты','folder'],['semantics','Семантика','search'],['campaign','Кампания','campaign']].map(([key,label,symbol])=>'<button type="button" data-action="nav-'+key+'"'+(page===key||page==='new'&&key==='projects'?' aria-current="page"':'')+'>'+icon(symbol)+esc(label)+'</button>').join('');
+  q('#nav').innerHTML=[['projects','Проекты','folder'],['semantics','Семантика','search'],['campaign','Кампания','campaign'],['templates','Шаблоны','folder']].map(([key,label,symbol])=>'<button type="button" data-action="nav-'+key+'"'+(page===key||(page==='new'&&key==='projects')||(page==='template'&&key==='templates')?' aria-current="page"':'')+'>'+icon(symbol)+esc(label)+'</button>').join('');
   q('#side-project').innerHTML='Текущий проект<strong>'+esc(p.name)+'</strong>';
-  q('#breadcrumb').textContent=page==='projects'||page==='new'?'Рабочее пространство':'Проекты / '+p.name;
+  q('#breadcrumb').textContent=['projects','new','templates','template'].includes(page)?'Рабочее пространство':'Проекты / '+p.name;
 }
 function projectsPage(){
   return head('Проекты','Подготовка поисковой рекламы для Яндекс Директа',button('Новый проект','new',{primary:true,icon:'plus'}))+
@@ -418,27 +703,32 @@ function campaignPage(p){
   const settings=c.settings??buildBrief(p,brief).settings;
   const missing=[
     ...(c.problems??(review?buildBrief(p,brief).problems:[])),
-    ...(!allowedUrl(brief.site)&&c.groups.some(item=>!allowedUrl(item.url))?['Укажите сайт или посадочную ссылку для каждой группы.']:[]),
+    ...(!allowedUrl(settings.site)&&c.groups.some(item=>!allowedUrl(item.url))?['Укажите сайт или посадочную ссылку для каждой группы.']:[]),
     ...c.groups.filter(item=>!item.title||!item.description).map(item=>'«'+item.name+'» — проверьте заголовок и текст объявления.')
   ];
   const needsGoal=c.needsGoal??buildBrief(p,brief).needsGoal;
-  const needsInputs=!settings.budget||!allowedUrl(brief.site);
+  const hasTemplate=Boolean(settings.campaignTemplate);
+  const needsInputs=!settings.budget||!allowedUrl(settings.site);
   const clarify=(needsInputs?button('Указать бюджет или сайт','campaign-inputs',{small:true}):'')+
-    (needsGoal?button('Указать цель Метрики','campaign-goal',{small:true})+button('Продолжить на кликах','campaign-clicks',{small:true}):'');
+    (needsGoal?(hasTemplate?button('Редактировать шаблон','campaign-edit-template',{small:true}):
+      button('Указать цель Метрики','campaign-goal',{small:true})+button('Продолжить на кликах','campaign-clicks',{small:true})):'');
   const issues=missing.length&&review?'<section class="notice error"><strong>Требует уточнения</strong><ul>'+missing.map(item=>'<li>'+esc(item)+'</li>').join('')+'</ul>'+(clarify?'<div class="row subsection">'+clarify+'</div>':'')+'</section>':'';
   const changes=c.changes&&(c.version>1||c.changes.length)?'<details class="card pad"><summary>Изменения в версии '+number(c.version)+'</summary>'+
     (c.changes.length?'<ul class="details-list">'+c.changes.map(item=>'<li>'+esc(item)+'</li>').join('')+'</ul>':'<p class="muted smalltext">Параметры, группы и объявления совпадают с предыдущей версией.</p>')+'</details>':'';
   const budget=settings.budget?number(settings.budget)+' ₽ '+periods[settings.period]:'Уточнить';
   const setting=(label,value,wide=false)=>'<div'+(wide?' class="wide"':'')+'><span>'+label+'</span><strong>'+esc(value)+'</strong></div>';
   const settingsCard='<section class="card pad stack"><div class="row spread"><h2>Настройки кампании</h2>'+
-    (review?'<div class="row">'+button('Бюджет и сайт','campaign-inputs',{small:true})+button('Цель Метрики','campaign-goal',{small:true})+'</div>':'')+'</div><div class="params">'+
+    (review?'<div class="row">'+button('Бюджет и сайт','campaign-inputs',{small:true})+
+      (hasTemplate?'':button('Цель Метрики','campaign-goal',{small:true}))+button('Выбрать шаблон','campaign-template',{small:true})+
+      button('Сохранить как шаблон','campaign-save-template',{small:true})+'</div>':'')+'</div><div class="params">'+
     setting('Места показа',settings.placement)+setting('Стратегия',settings.strategy)+setting('Бюджет',budget)+
     setting('Регион из проекта',settings.region||'Все регионы')+
+    (hasTemplate?setting('Шаблон',settings.campaignTemplate.name):'')+
     setting('Группы и объявления',number(c.groups.length)+' / '+number(c.groups.length))+'</div>'+
     '<details><summary>Расписание, минус-фразы, Метрика и UTM</summary><div class="params">'+
     setting('Расписание показов',settings.schedule)+setting('Общие минус-фразы',settings.negative.join(', ')||'Не заданы')+
     (settings.counter||settings.goal?setting('Счётчик Метрики',settings.counter||'Уточнить')+setting('Цель Метрики',settings.goal||'Уточнить'):'')+
-    (settings.counter&&review?'<div>'+button('Перейти на клики','campaign-clicks',{small:true})+'</div>':'')+
+    (settings.counter&&review&&!hasTemplate?'<div>'+button('Перейти на клики','campaign-clicks',{small:true})+'</div>':'')+
     setting('Параметры URL',settings.utm||'Не заданы',true)+'</div></details></section>';
   const actions=c.status==='review'?
     button('Вернуть на доработку','reject')+button('Подтвердить','approve',{primary:true,disabled:!!missing.length}):
@@ -453,7 +743,7 @@ function campaignPage(p){
     '<p class="muted smalltext">Например: «Показы по будням с 9 до 19», «Исключи вакансии», «Упомяни бесплатный замер». Поддерживаются типовые формулировки.</p>'+
     '<div class="actionbar"><button class="btn primary" type="submit">Применить пожелания</button></div></form></details>':'';
   return head('Проверка кампании',p.name,'<span class="badge '+(c.status==='approved'||c.status==='sent'?'green':c.status==='revision'?'amber':'')+'">'+statusText[c.status]+'</span>')+
-    stage(p)+message+issues+settingsCard+wishes+changes+
+    stage(p)+message+issues+settingsCard+templateSummary(c)+wishes+changes+
     '<div class="workspace"><section class="card"><div class="card-head"><h2>Группы объявлений</h2></div><div class="list">'+
     c.groups.map((item,i)=>'<button type="button" class="'+(item===group?'active':'')+'" aria-pressed="'+(item===group)+'" data-action="group-select" data-index="'+i+'">'+esc(item.name)+'</button>').join('')+
     '</div></section><section class="card"><div class="card-head"><h2>'+esc(group.name)+'</h2>'+(review?button('Редактировать группу','edit',{small:true}):'')+'</div>'+
@@ -464,7 +754,7 @@ function campaignPage(p){
 function render(){
   const p=project();
   shell();
-  q('#page').innerHTML=page==='projects'?projectsPage():page==='new'?projectForm():page==='campaign'?campaignPage(p):semanticsPage(p);
+  q('#page').innerHTML=page==='projects'?projectsPage():page==='new'?projectForm():page==='campaign'?campaignPage(p):page==='templates'?renderTemplateList():page==='template'?templateEditor():semanticsPage(p);
 }
 function changePage(target){
   page=target;query='';render();window.scrollTo(0,0);
@@ -639,13 +929,32 @@ function editGroup(p){
     });
 }
 document.addEventListener('submit',event=>{
+  if(event.target.id==='template-form'){
+    event.preventDefault();
+    try{
+      const data=new FormData(event.target), name=trim(data.get('name'));
+      if(!name)throw Error('Введите название шаблона.');
+      if(templates().some(item=>item.id!==templateEditing.id&&item.name.toLowerCase()===name.toLowerCase())){
+        throw Error('Шаблон с таким названием уже есть.');
+      }
+      const updated={id:templateEditing.id??globalThis.crypto?.randomUUID?.()??String(Date.now()),name,settings:collectTemplate(data)};
+      state.templates=[...templates().filter(item=>item.id!==updated.id),updated];
+      save();changePage('templates');notify('Шаблон сохранён.');
+    }catch(error){showTemplateError(error.message);}
+    return;
+  }
   if(event.target.id==='wishes-form'){
     event.preventDefault();
     const p=project(),data=new FormData(event.target);
     if(!['review','revision'].includes(p.campaign?.status))return;
-    const instruction=trim(data.get('instruction'));
+    const input=trim(data.get('instruction'));
+    const request=wishParts(input).map(line=>line.match(/^(?:используй(?:те)?\s+)?шаблон\s+[«"](.+?)[»"]$/i)).filter(Boolean);
+    if(request.length>1){notify('Укажите один шаблон кампании.');return;}
+    const chosen=request.length?templates().find(item=>item.name.toLowerCase()===request[0][1].trim().toLowerCase()):null;
+    if(request.length&&!chosen){notify('Шаблон «'+request[0][1]+'» не найден.');return;}
+    const instruction=request.length?wishParts(input).filter(line=>line!==request[0][0]).join('\n'):input;
     const previous=campaignBrief(p,p.campaign);
-    reviseDraft(p,{instruction,optimize:instruction!==previous.instruction&&previous.optimize==='clicks'?'auto':previous.optimize});
+    reviseDraft(p,{instruction,...(chosen?{campaignTemplate:structuredClone(chosen)}:{}),optimize:instruction!==previous.instruction&&previous.optimize==='clicks'?'auto':previous.optimize});
     return;
   }
   if(event.target.id!=='project-form')return;
@@ -659,12 +968,29 @@ document.addEventListener('submit',event=>{
   state.projects.push(p);state.active=p.id;selectedCluster=0;selectedGroup=0;save();changePage('semantics');
 });
 document.addEventListener('click',event=>{
+  if(event.target.closest('button.remove-adjustment')){event.target.closest('.adjustment-row')?.remove();return;}
   const target=event.target.closest('button[data-action]');
   if(!target||target.disabled)return;
   const {action,id,index}=target.dataset;
   const p=project(),c=p.campaign;
   if(action.startsWith('nav-')){changePage(action.slice(4));return;}
   switch(action){
+    case 'template-new': openTemplate();break;
+    case 'template-edit':
+    case 'template-copy': {
+      const item=templates().find(entry=>entry.id===id);
+      if(item)openTemplate(item,action==='template-copy');
+      break;
+    }
+    case 'template-goals': void refreshTemplateGoals();break;
+    case 'template-adjustment': q('#adjustments').insertAdjacentHTML('beforeend',adjustmentRow());break;
+    case 'campaign-template': if(c&&['review','revision'].includes(c.status))chooseTemplate(p);break;
+    case 'campaign-edit-template': {
+      const item=templates().find(entry=>entry.id===c?.settings?.campaignTemplate?.id);
+      if(item)openTemplate(item);else notify('Откройте «Шаблоны» и выберите сохранённые настройки.');
+      break;
+    }
+    case 'campaign-save-template': if(c)openTemplate(templateFromCampaign(c));break;
     case 'new': changePage('new');break;
     case 'open': state.active=id;selectedCluster=0;selectedGroup=0;save();changePage('semantics');break;
     case 'n8n-settings': if(bridgeReady&&!agentJob)openN8nSettings();break;
@@ -682,8 +1008,7 @@ document.addEventListener('click',event=>{
     case 'csv-download': download(files[index][0],'\uFEFF'+p.data.files[index].replace(/^\uFEFF/,''),'text/csv;charset=utf-8');break;
     case 'generate':
       if(p.clusters.length&&agentJob?.projectId!==p.id){
-        if(!c){p.campaign=draft(p);selectedGroup=0;save();}
-        changePage('campaign');
+        if(!c)chooseTemplate(p);else changePage('campaign');
       }
       break;
     case 'campaign-inputs': if(c&&['review','revision'].includes(c.status))editCampaignInputs(p);break;
@@ -736,6 +1061,13 @@ document.addEventListener('click',event=>{
       break;
     case 'close-dialog': q('#dialog').close();break;
   }
+});
+q('#page').addEventListener('change',event=>{
+  if(event.target.name!=='adjustmentType')return;
+  const row=event.target.closest('.adjustment-row');
+  const demographic=event.target.value==='demographic';
+  row.querySelector('.adjustment-detail').hidden=demographic;
+  row.querySelector('.adjustment-demographic').hidden=!demographic;
 });
 q('#page').addEventListener('input',event=>{
   if(event.target.id!=='query')return;
