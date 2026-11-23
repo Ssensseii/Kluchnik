@@ -20,6 +20,11 @@
 .adjustment-row{grid-template-columns:1fr 1fr minmax(120px,.8fr) auto}.goal-row small{display:block;color:var(--muted);font-size:13px}
 #adjustments:not(:empty){margin-bottom:10px}#template-error{overflow-wrap:anywhere}
 @media(max-width:640px){.adjustment-row,.goal-row{grid-template-columns:1fr}}
+.group-assignment-row{display:grid;grid-template-columns:1fr minmax(200px,1fr);align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.group-settings{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:0}
+.group-settings dt{color:var(--muted);font-size:14px}.group-settings dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.template-section h3{margin:12px 0 6px}.template-section .form-grid+.smalltext{margin-top:10px}
+@media(max-width:640px){.group-assignment-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -232,8 +237,10 @@ function renderTemplateList(){
     '<span class="badge">'+esc(item.settings.strategyKind==='package'?'Пакетная стратегия':strategies[item.settings.strategyType])+'</span></div>'+
     '<p class="muted smalltext">'+esc(item.settings.placements.map(value=>placements[value]).join(' · '))+'</p>'+
     '<div class="row">'+templateButton('Редактировать','template-edit',item.id)+templateButton('Дублировать','template-copy',item.id)+'</div></article>').join('');
-  return head('Шаблоны','Настройки уровня кампании',button('Создать шаблон','template-new',{primary:true,icon:'plus'}))+
-    (cards?'<div class="templates-grid">'+cards+'</div>':'<section class="card empty">Создайте первый шаблон. Его можно будет выбрать при подготовке кампании.</section>');
+  return head('Шаблоны','Сохранённые настройки кампаний и групп')+
+    '<section class="stack"><div class="row spread"><h2>Шаблоны кампаний</h2>'+button('Создать шаблон кампании','template-new',{primary:true,icon:'plus'})+
+    '</div>'+(cards?'<div class="templates-grid">'+cards+'</div>':'<div class="card empty">Создайте шаблон для подготовки кампаний.</div>')+'</section>'+
+    groupTemplateCards();
 }
 function templateButton(label,action,id){
   return '<button class="btn small" type="button" data-action="'+action+'" data-id="'+esc(id)+'">'+label+'</button>';
@@ -246,18 +253,18 @@ function boxes(name,options,selected){
 const adjustmentTypes={region:'Регион',demographic:'Пол и возраст',device:'Устройство',audience:'Аудитория',other:'Другое'};
 const genders={any:'Любой пол',male:'Только мужчины',female:'Только женщины'};
 const ages={any:'Любой возраст',under18:'Младше 18',age18to24:'18–24',age25to34:'25–34',age35to44:'35–44',age45to54:'45–54',age55plus:'55 и старше'};
-function adjustmentRow(item={}){
-  const type=item.type??'region', demographic=type==='demographic';
-  return '<div class="adjustment-row">'+templateSelect('Условие',adjustmentTypes,'adjustmentType',type)+
+function adjustmentRow(item={},types=adjustmentTypes){
+  const type=item.type??Object.keys(types)[0], demographic=type==='demographic';
+  return '<div class="adjustment-row">'+templateSelect('Условие',types,'adjustmentType',type)+
     '<div class="adjustment-detail"'+(demographic?' hidden':'')+'>'+field('adjustmentValue','Значение',item.value??'','maxlength="100" placeholder="Например, Москва"')+'</div>'+
     '<div class="adjustment-demographic form-grid"'+(demographic?'':' hidden')+'>'+
     templateSelect('Пол',genders,'adjustmentGender',item.gender??'any')+templateSelect('Возраст',ages,'adjustmentAge',item.age??'any')+'</div>'+
     field('adjustmentPercent','Корректировка, %',item.percent??'','type="number" min="-100" step="1"')+
     '<button type="button" class="btn small remove-adjustment" aria-label="Убрать корректировку">Убрать</button></div>';
 }
-function adjustmentLabel(rule){
+function adjustmentLabel(rule,types=adjustmentTypes){
   const condition=rule.type==='demographic'?[genders[rule.gender],ages[rule.age]].join(' · '):rule.value;
-  return adjustmentTypes[rule.type]+' · '+condition+' · '+rule.percent+'%';
+  return types[rule.type]+' · '+condition+' · '+rule.percent+'%';
 }
 function goalsMarkup(goals,selected){
   if(!goals.length)return '<p class="muted smalltext">Выберите цели после загрузки выбранных счётчиков.</p>';
@@ -314,6 +321,16 @@ function showTemplateError(message){
   error.textContent=message;error.hidden=!message;
   if(message)error.scrollIntoView({block:'nearest'});
 }
+function readAdjustments(data){
+  const adjustmentValues=data.getAll('adjustmentValue'), percents=data.getAll('adjustmentPercent');
+  const adjustmentGenders=data.getAll('adjustmentGender'), adjustmentAges=data.getAll('adjustmentAge');
+  const adjustments=data.getAll('adjustmentType').map((type,index)=>({
+    type,value:type==='demographic'?'':trim(adjustmentValues[index]),percent:trim(percents[index]),
+    ...(type==='demographic'?{gender:adjustmentGenders[index],age:adjustmentAges[index]}:{})
+  })).filter(rule=>rule.type==='demographic'||rule.value||rule.percent);
+  if(adjustments.some(rule=>rule.percent===''||(rule.type==='demographic'?rule.gender==='any'&&rule.age==='any':!rule.value)))throw Error('Заполните условие и процент каждой корректировки.');
+  return adjustments;
+}
 function collectTemplate(data){
   const fields=templateSections.flatMap(([,items])=>items);
   const settings=Object.fromEntries(fields.map(([key])=>[key,trim(data.get(key))]));
@@ -322,12 +339,7 @@ function collectTemplate(data){
   settings.goals=chosenGoals(data);
   settings.goalsUpdatedAt=goalsUpdatedAt;
   settings.customDays=data.getAll('customDays');
-  const adjustmentValues=data.getAll('adjustmentValue'), percents=data.getAll('adjustmentPercent');
-  const adjustmentGenders=data.getAll('adjustmentGender'), adjustmentAges=data.getAll('adjustmentAge');
-  settings.adjustments=data.getAll('adjustmentType').map((type,index)=>({
-    type,value:type==='demographic'?'':trim(adjustmentValues[index]),percent:trim(percents[index]),
-    ...(type==='demographic'?{gender:adjustmentGenders[index],age:adjustmentAges[index]}:{})
-  })).filter(rule=>rule.type==='demographic'||rule.value||rule.percent);
+  settings.adjustments=readAdjustments(data);
   if(!settings.placements.length)throw Error('Выберите хотя бы одно место показа.');
   if(settings.strategyKind==='package'&&!/^\d{1,15}$/.test(settings.packageId))throw Error('Укажите числовой ID пакетной стратегии.');
   if(settings.budgetMode==='fixed'&&!(Number(settings.budget)>0))throw Error('Укажите сумму бюджета шаблона.');
@@ -337,7 +349,6 @@ function collectTemplate(data){
   if(settings.counterIds.length>10||settings.counterIds.some(id=>!/^\d{1,15}$/.test(id)))throw Error('Укажите до десяти числовых ID счётчиков.');
   if(settings.goals.some(goal=>!settings.counterIds.includes(goal.counterId)||
      goalCatalog.some(item=>item.unavailable&&item.id===goal.id&&item.counterId===goal.counterId)))throw Error('Проверьте выбранные цели и их счётчики.');
-  if(settings.adjustments.some(rule=>rule.percent===''||(rule.type==='demographic'?rule.gender==='any'&&rule.age==='any':!rule.value)))throw Error('Заполните условие и процент каждой корректировки.');
   if(settings.promotedSite&&!allowedUrl(settings.promotedSite))throw Error('Укажите адрес сайта с http:// или https://.');
   return settings;
 }
@@ -367,11 +378,17 @@ async function refreshTemplateGoals(){
 function applyTemplate(p,item){
   const snapshot=item?structuredClone(item):null;
   const brief={...campaignBrief(p,p.campaign),campaignTemplate:snapshot};
-  p.campaign=draft(p,p.campaign,brief);
+  const generated=draft(p,p.campaign,brief);
+  if(!p.campaign&&groupTemplates().length){
+    pendingGroupDraft={...generated,projectId:p.id};
+    changePage('assign-groups');
+    return;
+  }
+  p.campaign=generated;
   selectedGroup=0;save();changePage('campaign');
 }
 function chooseTemplate(p){
-  if(!templates().length){if(p.campaign){notify('Создайте первый шаблон во вкладке «Шаблоны».');return;}applyTemplate(p,null);return;}
+  if(!templates().length){if(p.campaign){notify('Создайте первый шаблон кампании во вкладке «Шаблоны».');return;}applyTemplate(p,null);return;}
   const options=Object.fromEntries([['','Без шаблона'],...templates().map(item=>[item.id,item.name])]);
   showDialog('Шаблон кампании',templateSelect('Выбрать шаблон',options,'templateId',p.campaign?.brief?.campaignTemplate?.id??''),
     p.campaign?'Применить':'Подготовить кампанию',data=>applyTemplate(p,templates().find(item=>item.id===data.get('templateId'))));
@@ -421,6 +438,162 @@ function templateSummary(c){
   for(const goal of t.goals)values.push('<div><span>Цель Метрики</span><strong>'+esc(goal.name+' · '+(goal.price?goal.price+' ₽':'цена не задана'))+'</strong></div>');
   for(const rule of t.adjustments)values.push('<div><span>Корректировка</span><strong>'+esc(adjustmentLabel(rule))+'</strong></div>');
   return '<details class="card pad"><summary>Параметры шаблона «'+esc(c.settings.campaignTemplate.name)+'»</summary><div class="params">'+values.join('')+'</div></details>';
+}
+
+const groupScenarios={interested:'Вся заинтересованная аудитория',newCustomers:'Новые покупатели'};
+const groupGeoModes={project:'Регион проекта',regions:'Перечислить страны, области, города',map:'Зоны по координатам'};
+const groupQueryTypes={target:'Целевые запросы',narrow:'Узкие запросы',wide:'Широкие запросы',related:'Сопутствующие запросы',alternative:'Альтернативные запросы'};
+const groupBrandTypes={own:'С упоминанием своего бренда',competitors:'С упоминанием брендов конкурентов',generic:'Без упоминания брендов'};
+const groupExtensionModes={inherit:'Использовать настройки кампании',own:'Задать для группы',off:'Выключить'};
+const groupAdjustmentTypes={demographic:'Пол и возраст',device:'Устройства',audience:'Целевая аудитория',format:'Формат объявления',income:'Платёжеспособность',weather:'Погодные условия',spending:'Уровень трат в категории',conversion:'Цена конверсии в группе'};
+const groupFields=[
+  ['География показов',[
+    ['geoMode','Способ задания географии',groupGeoModes],['regionNames','Страны, области, города','area'],
+    ['regionIds','Числовые ID регионов','area'],['mapAreas','Зоны: широта, долгота, радиус в метрах','area']
+  ]],
+  ['Подбор и исключение запросов',[
+    ['scenario','Сценарий группы',groupScenarios],['autotarget','Автотаргетинг на Поиске',onOff],
+    ['extraKeywords','Дополнительные ключевые фразы','area'],['negative','Минус-фразы группы','area'],
+    ['excludedDescription','Описание неподходящих запросов','area']
+  ]],
+  ['Сегменты аудитории',[
+    ['audienceIds','ID сегментов аудитории','area'],['excludedAudienceIds','ID исключённых сегментов','area']
+  ]],
+  ['Дополнительные элементы объявлений группы',[
+    ['sitelinkMode','Быстрые ссылки',groupExtensionModes],['sitelinkId','ID набора быстрых ссылок','text'],
+    ['calloutMode','Уточнения',groupExtensionModes],['calloutIds','ID уточнений','area'],
+    ['promotionMode','Промоакция',groupExtensionModes],['promotionId','ID промоакции','text']
+  ]],
+  ['Параметры URL',[
+    ['utm','Параметры URL / UTM группы','area']
+  ]]
+];
+let groupTemplateEditing=null, pendingGroupDraft=null;
+const groupTemplates=()=>state.groupTemplates??[];
+function groupEditor(){
+  const item=groupTemplateEditing, value=item.settings;
+  const cards=groupFields.map(([title,fields],index)=>{
+    const extra=index===0?'<p class="muted smalltext">По умолчанию действует регион проекта. При явном переопределении проверьте соответствие географии собранным запросам. Для зоны укажите три значения на строку.</p>':
+      index===1?'<p class="muted smalltext">Ключевые фразы из кластера подставляются автоматически. Здесь можно добавить общие для шаблона фразы.</p>'+
+      '<h3>Исключить категории запросов</h3>'+boxes('excludedQueryTypes',groupQueryTypes,value.excludedQueryTypes)+
+      '<h3>Исключить по упоминанию брендов</h3>'+boxes('excludedBrandTypes',groupBrandTypes,value.excludedBrandTypes):'';
+    return '<details class="card pad template-section"'+(index<2?' open':'')+'><summary>'+title+'</summary><div class="form-grid">'+
+      fields.map(f=>templateField(f,value)).join('')+'</div>'+extra+'</details>';
+  });
+  return head(item.id?'Редактирование шаблона группы':'Новый шаблон группы','Уровень группы',button('К шаблонам','nav-templates'))+
+    '<form class="template-form" id="group-template-form"><section class="card pad">'+field('name','Название шаблона группы',item.name,'required maxlength="100"')+'</section>'+
+    cards.join('')+'<details class="card pad template-section"><summary>Корректировки группы</summary><div id="adjustments">'+
+    value.adjustments.map(rule=>adjustmentRow(rule,groupAdjustmentTypes)).join('')+'</div>'+
+    button('Добавить корректировку','template-adjustment',{small:true})+'</details>'+
+    '<p id="template-error" class="notice error" role="alert" hidden></p>'+
+    '<div class="actionbar"><button class="btn primary" type="submit">Сохранить шаблон группы</button></div></form>';
+}
+function openGroupTemplate(item,copy=false){
+  groupTemplateEditing=item?structuredClone(item):{name:'',settings:{
+    geoMode:'project',scenario:'interested',excludedQueryTypes:[],excludedBrandTypes:[],adjustments:[],
+    sitelinkMode:'inherit',calloutMode:'inherit',promotionMode:'inherit'
+  }};
+  if(copy){
+    groupTemplateEditing.name=(item.name.slice(0,93)+' — копия').slice(0,100);
+    delete groupTemplateEditing.id;
+  }
+  changePage('group-template');
+}
+function collectGroupTemplate(data){
+  const settings=Object.fromEntries(groupFields.flatMap(([,items])=>items).map(([key])=>[key,trim(data.get(key))]));
+  settings.excludedQueryTypes=data.getAll('excludedQueryTypes');
+  settings.excludedBrandTypes=data.getAll('excludedBrandTypes');
+  settings.adjustments=readAdjustments(data);
+  const numberIds=value=>listValues(value).every(id=>/^\d{1,15}$/.test(id));
+  if(settings.geoMode==='regions'&&!settings.regionNames&&!settings.regionIds)throw Error('Укажите регионы группы или выберите регион проекта.');
+  if(settings.geoMode==='map'&&!settings.mapAreas)throw Error('Добавьте хотя бы одну зону.');
+  if(settings.geoMode==='map'){
+    for(const line of settings.mapAreas.split(/\r?\n/).map(trim).filter(Boolean)){
+      const parts=line.split(',').map(trim), [lat,lon,radius]=parts.map(Number);
+      if(parts.length!==3||parts.some(part=>!part)||!Number.isFinite(lat)||Math.abs(lat)>90||
+        !Number.isFinite(lon)||Math.abs(lon)>180||!Number.isInteger(radius)||radius<1){
+        throw Error('Для зоны укажите широту, долготу и положительный радиус в метрах.');
+      }
+    }
+  }
+  if(![settings.regionIds,settings.audienceIds,settings.excludedAudienceIds,settings.calloutIds].every(numberIds)){
+    throw Error('Используйте числовые ID регионов, сегментов и уточнений.');
+  }
+  if(settings.sitelinkMode==='own'&&!/^\d{1,15}$/.test(settings.sitelinkId))throw Error('Укажите ID набора быстрых ссылок.');
+  if(settings.calloutMode==='own'&&!listValues(settings.calloutIds).length)throw Error('Укажите ID уточнений.');
+  if(settings.promotionMode==='own'&&!/^\d{1,15}$/.test(settings.promotionId))throw Error('Укажите ID промоакции.');
+  return settings;
+}
+function groupTemplateCards(){
+  const cards=groupTemplates().map(item=>'<article class="card pad stack"><div class="row spread"><h3>'+esc(item.name)+'</h3>'+
+    '<span class="badge">'+esc(groupScenarios[item.settings.scenario])+'</span></div>'+
+    '<p class="muted smalltext">'+esc(groupGeoModes[item.settings.geoMode])+'</p>'+
+    '<div class="row">'+templateButton('Редактировать','group-template-edit',item.id)+templateButton('Дублировать','group-template-copy',item.id)+'</div></article>').join('');
+  return '<section class="stack"><div class="row spread"><h2>Шаблоны групп</h2>'+button('Создать шаблон группы','group-template-new',{icon:'plus'})+
+    '</div>'+(cards?'<div class="templates-grid">'+cards+'</div>':'<div class="card empty">Создайте настройки, которые можно назначать отдельным группам.</div>')+'</section>';
+}
+function groupTemplateOptions(){
+  return Object.fromEntries([['','Без шаблона группы'],...groupTemplates().map(item=>[item.id,item.name])]);
+}
+function groupAssignmentPage(p){
+  const c=pendingGroupDraft;
+  const rows=c.groups.map((group,index)=>'<div class="group-assignment-row"><div><strong>'+esc(group.name)+'</strong><p class="muted smalltext">'+
+    number(group.keywords.length)+' фраз из кластера</p></div>'+
+    templateSelect('Шаблон для группы '+esc(group.name),groupTemplateOptions(),'group:'+index,group.groupTemplate?.id??'')+'</div>').join('');
+  return head('Назначение шаблонов групп',p.name)+stage(p)+
+    '<form class="card pad stack" id="group-assign-form"><div class="row spread"><h2>Группы после кластеризации</h2>'+
+    '<span class="badge">'+esc(c.settings.campaignTemplate?.name??'Кампания без шаблона')+'</span></div>'+
+    '<p class="muted smalltext">Выберите шаблон отдельно для каждой группы. Можно продолжить и с настройками по умолчанию.</p>'+
+    rows+'<div class="actionbar">'+button('Назад','nav-semantics')+'<button type="submit" class="btn primary">Открыть черновик</button></div></form>';
+}
+function setGroupTemplate(group,id){
+  const item=groupTemplates().find(entry=>entry.id===id);
+  group.groupTemplate=item?structuredClone(item):null;
+}
+function groupPhrases(group,key){
+  const settings=group.groupTemplate?.settings;
+  const additional=settings?.[key==='keywords'?'extraKeywords':'negative'];
+  return [...new Set([...group[key],...listValues(additional)])];
+}
+function effectiveGroupGeo(group,project){
+  const settings=group.groupTemplate?.settings;
+  if(settings?.geoMode==='regions')return {mode:'regions',label:settings.regionNames||settings.regionIds,regionIds:listValues(settings.regionIds)};
+  if(settings?.geoMode==='map')return {mode:'map',label:'Зоны группы по координатам',areas:settings.mapAreas.split(/\r?\n/).map(trim).filter(Boolean).map(line=>{
+    const [lat,lon,radiusMeters]=line.split(',').map(Number);
+    return {lat,lon,radiusMeters};
+  })};
+  return {mode:'project',label:project.region||'Все регионы',regionIds:project.regionCodes??[]};
+}
+function groupTemplateSummary(group,p){
+  const t=group.groupTemplate?.settings;
+  if(!t)return '';
+  const geo=effectiveGroupGeo(group,p);
+  const query=t.excludedQueryTypes.map(id=>groupQueryTypes[id]).join(', ');
+  const brands=t.excludedBrandTypes.map(id=>groupBrandTypes[id]).join(', ');
+  const values=[
+    ['Сценарий группы',groupScenarios[t.scenario]],['География показов',geo.label],['ID регионов',geo.regionIds?.join(', ')],
+    ['Координаты и радиус',geo.mode==='map'?t.mapAreas:''],['Автотаргетинг',onOff[t.autotarget]??onOff['']],
+    ['Исключённые категории',query],['Исключённые бренды',brands],['Описание неподходящих запросов',t.excludedDescription],
+    ['Сегменты аудитории',t.audienceIds],['Исключённые сегменты',t.excludedAudienceIds],
+    ['Быстрые ссылки',groupExtensionModes[t.sitelinkMode]+(t.sitelinkMode==='own'?' · '+t.sitelinkId:'')],
+    ['Уточнения',groupExtensionModes[t.calloutMode]+(t.calloutMode==='own'?' · '+t.calloutIds:'')],
+    ['Промоакция',groupExtensionModes[t.promotionMode]+(t.promotionMode==='own'?' · '+t.promotionId:'')],
+    ['Параметры URL / UTM группы',t.utm],
+    ...t.adjustments.map(rule=>['Корректировка',adjustmentLabel(rule,groupAdjustmentTypes)])
+  ].filter(([,value])=>value);
+  return '<details class="subsection"><summary>Настройки шаблона группы</summary><dl class="group-settings">'+values.map(([label,value])=>
+    '<div><dt>'+esc(label)+'</dt><dd>'+esc(value)+'</dd></div>').join('')+'</dl></details>';
+}
+function chooseGroupTemplate(p){
+  if(!groupTemplates().length){notify('Создайте шаблон группы во вкладке «Шаблоны».');return;}
+  const c=p.campaign, group=c.groups[selectedGroup]??c.groups[0];
+  showDialog('Шаблон группы',templateSelect('Шаблон для группы '+esc(group.name),groupTemplateOptions(),'groupTemplateId',group.groupTemplate?.id??''),
+    'Применить',data=>{
+      const before=campaignBasis(c);
+      setGroupTemplate(group,data.get('groupTemplateId'));
+      c.changes=[...new Set([...(c.changes??[]),...changeSummary(before,c)])];
+      save();render();
+    });
 }
 
 function defaultBrief(p){
@@ -566,7 +739,7 @@ function changeSummary(before,after){
   for(const group of after.groups){
     const old=oldGroups.get(group.name);
     if(!old){changes.push('Новая группа · '+group.name);continue;}
-    const fields={keywords:'ключевые фразы',negative:'минус-фразы',title:'заголовок',description:'текст объявления',url:'посадочная страница'};
+    const fields={keywords:'ключевые фразы',negative:'минус-фразы',groupTemplate:'шаблон группы',title:'заголовок',description:'текст объявления',url:'посадочная страница'};
     const edited=Object.keys(fields).filter(key=>JSON.stringify(old[key])!==JSON.stringify(group[key])).map(key=>fields[key]);
     if(edited.length)changes.push(group.name+' · '+edited.join(', '));
     oldGroups.delete(group.name);
@@ -589,7 +762,7 @@ function draft(p,old,brief=campaignBrief(p,old)){
   let groups=p.clusters.map(group=>{
     const existing=oldGroups.get(group.name);
     return {name:group.name,keywords:[...new Set([...(existing?.keywords??group.rows.map(row=>row.phrase)),...group.rows.filter(row=>splitPhrases.has(row.phrase)).map(row=>row.phrase)])],
-      negative:existing?.negative??[],...adFields(existing,group.name)};
+      negative:existing?.negative??[],groupTemplate:existing?.groupTemplate??null,...adFields(existing,group.name)};
   });
   const used=new Set();
   for(const name of split){
@@ -611,7 +784,7 @@ function draft(p,old,brief=campaignBrief(p,old)){
     }
     if(!keywords.size){problems.push('Для отдельной группы «'+name+'» нет подходящих фраз.');continue;}
     if(exact){exact.keywords=[...keywords];exact.splitFrom=[...(exact.splitFrom??[]),...moved];continue;}
-    groups.push({name,keywords:[...keywords],splitFrom:moved,negative:prior?.negative??[],...adFields(prior,name)});
+    groups.push({name,keywords:[...keywords],splitFrom:moved,negative:prior?.negative??[],groupTemplate:prior?.groupTemplate??null,...adFields(prior,name)});
   }
   groups=groups.filter(group=>group.keywords.length);
   for(const group of groups){
@@ -634,7 +807,7 @@ function download(name,data,type){
   link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
 }
 function stage(p){
-  const index=({projects:0,semantics:1,campaign:p.campaign?.status==='sent'?3:2})[page]??0;
+  const index=({projects:0,semantics:1,'assign-groups':2,campaign:p.campaign?.status==='sent'?3:2})[page]??0;
   return '<div class="stage" aria-label="Этапы проекта">'+['Проект','Семантика','Кампания','Передача'].map((name,i)=>'<span class="'+(i===index?'current':i<index?'done':'')+'">'+esc(name)+'</span>').join('')+'</div>';
 }
 function head(title,subtitle,actions=''){return '<div class="page-head"><div><h1>'+esc(title)+'</h1><p>'+esc(subtitle)+'</p></div><div class="row">'+actions+'</div></div>';}
@@ -644,9 +817,9 @@ function shell(){
   button.disabled=!bridgeReady;
   button.textContent=agentAvailable?'Настройки n8n':bridgeReady?'Подключить n8n':'Демо-режим';
   q('#brand-symbol').innerHTML=icon('key');
-  q('#nav').innerHTML=[['projects','Проекты','folder'],['semantics','Семантика','search'],['campaign','Кампания','campaign'],['templates','Шаблоны','folder']].map(([key,label,symbol])=>'<button type="button" data-action="nav-'+key+'"'+(page===key||(page==='new'&&key==='projects')||(page==='template'&&key==='templates')?' aria-current="page"':'')+'>'+icon(symbol)+esc(label)+'</button>').join('');
+  q('#nav').innerHTML=[['projects','Проекты','folder'],['semantics','Семантика','search'],['campaign','Кампания','campaign'],['templates','Шаблоны','folder']].map(([key,label,symbol])=>'<button type="button" data-action="nav-'+key+'"'+(page===key||(page==='new'&&key==='projects')||(['template','group-template'].includes(page)&&key==='templates')||(page==='assign-groups'&&key==='campaign')?' aria-current="page"':'')+'>'+icon(symbol)+esc(label)+'</button>').join('');
   q('#side-project').innerHTML='Текущий проект<strong>'+esc(p.name)+'</strong>';
-  q('#breadcrumb').textContent=['projects','new','templates','template'].includes(page)?'Рабочее пространство':'Проекты / '+p.name;
+  q('#breadcrumb').textContent=['projects','new','templates','template','group-template'].includes(page)?'Рабочее пространство':'Проекты / '+p.name;
 }
 function projectsPage(){
   return head('Проекты','Подготовка поисковой рекламы для Яндекс Директа',button('Новый проект','new',{primary:true,icon:'plus'}))+
@@ -745,18 +918,24 @@ function campaignPage(p){
   return head('Проверка кампании',p.name,'<span class="badge '+(c.status==='approved'||c.status==='sent'?'green':c.status==='revision'?'amber':'')+'">'+statusText[c.status]+'</span>')+
     stage(p)+message+issues+settingsCard+templateSummary(c)+wishes+changes+
     '<div class="workspace"><section class="card"><div class="card-head"><h2>Группы объявлений</h2></div><div class="list">'+
-    c.groups.map((item,i)=>'<button type="button" class="'+(item===group?'active':'')+'" aria-pressed="'+(item===group)+'" data-action="group-select" data-index="'+i+'">'+esc(item.name)+'</button>').join('')+
-    '</div></section><section class="card"><div class="card-head"><h2>'+esc(group.name)+'</h2>'+(review?button('Редактировать группу','edit',{small:true}):'')+'</div>'+
-    '<div class="pad stack"><p class="muted smalltext">Регион группы · '+esc(settings.region||'Все регионы')+' · из проекта</p><h3>Ключевые фразы</h3>'+phrases(group.keywords)+'<h3>Минус-фразы группы</h3>'+phrases(group.negative)+
+    c.groups.map((item,i)=>'<button type="button" class="'+(item===group?'active':'')+'" aria-pressed="'+(item===group)+'" data-action="group-select" data-index="'+i+'">'+'<span>'+esc(item.name)+(item.groupTemplate?'<br><small class="muted">'+esc(item.groupTemplate.name)+'</small>':'')+'</span></button>').join('')+
+    '</div></section><section class="card"><div class="card-head"><h2>'+esc(group.name)+'</h2>'+(review?'<div class="row">'+button('Шаблон группы','campaign-group-template',{small:true})+
+      button('Редактировать группу','edit',{small:true})+'</div>':'')+'</div>'+
+    '<div class="pad stack"><p class="muted smalltext">Регион группы · '+esc(effectiveGroupGeo(group,p).label)+
+    (effectiveGroupGeo(group,p).mode==='project'?' · из проекта':' · из шаблона группы')+'</p>'+
+    (group.groupTemplate?'<div><span class="badge">'+esc(group.groupTemplate.name)+'</span></div>':'')+
+    groupTemplateSummary(group,p)+'<h3>Ключевые фразы</h3>'+phrases(groupPhrases(group,'keywords'))+
+    '<h3>Минус-фразы группы</h3>'+phrases(groupPhrases(group,'negative'))+
     '<div class="ad"><h3>Текстово-графическое объявление</h3><strong>'+esc(group.title)+'</strong><p>'+esc(group.description)+'</p>'+(href?'<a href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+esc(group.url)+'</a>':'<p class="muted smalltext">Посадочная страница не указана</p>')+
     '</div></div></section></div><div class="actionbar">'+actions+'</div>';
 }
 function render(){
   const p=project();
   shell();
-  q('#page').innerHTML=page==='projects'?projectsPage():page==='new'?projectForm():page==='campaign'?campaignPage(p):page==='templates'?renderTemplateList():page==='template'?templateEditor():semanticsPage(p);
+  q('#page').innerHTML=page==='projects'?projectsPage():page==='new'?projectForm():page==='campaign'?campaignPage(p):page==='templates'?renderTemplateList():page==='template'?templateEditor():page==='group-template'?groupEditor():page==='assign-groups'?groupAssignmentPage(p):semanticsPage(p);
 }
 function changePage(target){
+  if(target!=='assign-groups')pendingGroupDraft=null;
   page=target;query='';render();window.scrollTo(0,0);
 }
 function allowedUrl(value){
@@ -929,16 +1108,29 @@ function editGroup(p){
     });
 }
 document.addEventListener('submit',event=>{
-  if(event.target.id==='template-form'){
+  if(event.target.id==='group-assign-form'){
+    event.preventDefault();
+    const p=project(), data=new FormData(event.target);
+    if(pendingGroupDraft?.projectId!==p.id||p.campaign)return;
+    const {projectId,...campaign}=pendingGroupDraft;
+    campaign.groups.forEach((group,index)=>setGroupTemplate(group,data.get('group:'+index)));
+    p.campaign=campaign;selectedGroup=0;save();changePage('campaign');
+    return;
+  }
+  if(['template-form','group-template-form'].includes(event.target.id)){
     event.preventDefault();
     try{
       const data=new FormData(event.target), name=trim(data.get('name'));
       if(!name)throw Error('Введите название шаблона.');
-      if(templates().some(item=>item.id!==templateEditing.id&&item.name.toLowerCase()===name.toLowerCase())){
+      const isGroup=event.target.id==='group-template-form';
+      const collection=isGroup?groupTemplates():templates();
+      const editing=isGroup?groupTemplateEditing:templateEditing;
+      if(collection.some(item=>item.id!==editing.id&&item.name.toLowerCase()===name.toLowerCase())){
         throw Error('Шаблон с таким названием уже есть.');
       }
-      const updated={id:templateEditing.id??globalThis.crypto?.randomUUID?.()??String(Date.now()),name,settings:collectTemplate(data)};
-      state.templates=[...templates().filter(item=>item.id!==updated.id),updated];
+      const updated={id:editing.id??globalThis.crypto?.randomUUID?.()??String(Date.now()),name,
+        settings:isGroup?collectGroupTemplate(data):collectTemplate(data)};
+      state[isGroup?'groupTemplates':'templates']=[...collection.filter(item=>item.id!==updated.id),updated];
       save();changePage('templates');notify('Шаблон сохранён.');
     }catch(error){showTemplateError(error.message);}
     return;
@@ -975,6 +1167,14 @@ document.addEventListener('click',event=>{
   const p=project(),c=p.campaign;
   if(action.startsWith('nav-')){changePage(action.slice(4));return;}
   switch(action){
+    case 'group-template-new': openGroupTemplate();break;
+    case 'group-template-edit':
+    case 'group-template-copy': {
+      const item=groupTemplates().find(entry=>entry.id===id);
+      if(item)openGroupTemplate(item,action==='group-template-copy');
+      break;
+    }
+    case 'campaign-group-template': if(c&&['review','revision'].includes(c.status))chooseGroupTemplate(p);break;
     case 'template-new': openTemplate();break;
     case 'template-edit':
     case 'template-copy': {
@@ -983,7 +1183,7 @@ document.addEventListener('click',event=>{
       break;
     }
     case 'template-goals': void refreshTemplateGoals();break;
-    case 'template-adjustment': q('#adjustments').insertAdjacentHTML('beforeend',adjustmentRow());break;
+    case 'template-adjustment': q('#adjustments').insertAdjacentHTML('beforeend',adjustmentRow({},page==='group-template'?groupAdjustmentTypes:adjustmentTypes));break;
     case 'campaign-template': if(c&&['review','revision'].includes(c.status))chooseTemplate(p);break;
     case 'campaign-edit-template': {
       const item=templates().find(entry=>entry.id===c?.settings?.campaignTemplate?.id);
@@ -1055,7 +1255,9 @@ document.addEventListener('click',event=>{
       break;
     case 'package':
       if(c?.status==='sent')download('klyuchnik-campaign.json',JSON.stringify({mode:'demo',operation:c.created,project:p.name,version:c.version,campaign:c.settings??buildBrief(p,defaultBrief(p)).settings,groups:c.groups.map(group=>({
-        name:group.name,region:p.region,keywords:group.keywords,negative:group.negative,
+        name:group.name,region:group.groupTemplate?effectiveGroupGeo(group,p).label:p.region,
+        geography:effectiveGroupGeo(group,p),keywords:groupPhrases(group,'keywords'),negative:groupPhrases(group,'negative'),
+        ...(group.groupTemplate?{groupTemplate:{id:group.groupTemplate.id,name:group.groupTemplate.name},settings:group.groupTemplate.settings}:{}),
         ads:[{format:'textGraphic',title:group.title,description:group.description,url:group.url}]
       }))},null,2),'application/json');
       break;
