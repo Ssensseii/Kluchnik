@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ключник — подготовка поисковых кампаний</title>
+<meta name="description" content="Рабочий кабинет для сбора семантики и подготовки поисковой кампании.">
+<style>
+:root{color-scheme:light;--bg:#f4f6fb;--paper:#fff;--line:#e2e8f2;--ink:#17243d;--muted:#526480;--blue:#254fd9;--pale:#eaf0ff;--nav:#112039;--green:#14674d;--radius:14px}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",Arial,sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.5}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #7694fe;outline-offset:2px}h1,h2,h3,p{margin:0}h1{font-size:clamp(29px,4vw,40px);line-height:1.13;letter-spacing:-.04em}h2{font-size:20px;letter-spacing:-.02em}h3{font-size:16px}a{color:var(--blue)}.app{min-height:100vh;display:grid;grid-template-columns:235px minmax(0,1fr)}aside{background:var(--nav);color:#eaf1ff;padding:24px 16px;display:flex;flex-direction:column;gap:26px}.brand{display:flex;align-items:center;gap:11px;padding:3px 7px}.brand-symbol{width:37px;height:37px;background:#4165ef;border-radius:11px;display:grid;place-items:center}.brand strong{font-size:21px;letter-spacing:-.035em}.ico{width:19px;height:19px;vertical-align:middle;flex:none}.brand .ico{width:21px;height:21px}.nav{display:grid;gap:5px}.nav button{display:flex;align-items:center;gap:11px;text-align:left;background:none;border:0;color:#c3d0e7;padding:11px 12px;border-radius:9px}.nav button:hover,.nav button[aria-current=page]{background:#263b60;color:white}.nav button[aria-current=page] .ico{color:#9bb4ff}.side-project{border-top:1px solid #344562;padding:18px 8px 0;color:#b8c5dd;font-size:14px}.side-project strong{display:block;color:white;margin-top:3px;overflow-wrap:anywhere}.side-note{margin-top:auto;color:#b8c5dd;padding:12px 8px;font-size:14px}.topbar{min-height:67px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:12px clamp(18px,4vw,52px);gap:10px}.topbar span:first-child{color:var(--muted);overflow-wrap:anywhere}.badge{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;border-radius:25px;padding:5px 11px;background:var(--pale);color:#2645a5;font-size:14px;font-weight:650}.badge.green{background:#e2f5ee;color:var(--green)}.badge.amber{background:#fff0d9;color:#895617}.page{max-width:1450px;margin:auto;padding:30px clamp(18px,4vw,52px) 46px;display:grid;gap:19px}.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}.page-head p{margin-top:8px;color:var(--muted)}.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);min-width:0;box-shadow:0 2px 6px #152b4c04}.pad{padding:21px}.card-head{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.stack{display:grid;gap:13px}.row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.spread{justify-content:space-between}.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid #d5deed;background:#fff;color:#253853;min-height:40px;padding:7px 13px;border-radius:8px;font-weight:650;font-size:14px;text-decoration:none}.btn:hover:not(:disabled){background:#f0f4fc}.btn.primary{background:var(--blue);border-color:var(--blue);color:white}.btn.primary:hover:not(:disabled){background:#1b3fc0}.btn.small{min-height:33px;padding:4px 10px}.muted{color:var(--muted)}.smalltext{font-size:14px}.stage{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:11px;background:#fff;overflow:hidden}.stage span{padding:11px 13px;font-size:14px;color:var(--muted);border-right:1px solid var(--line)}.stage span:last-child{border:0}.stage .current{background:var(--pale);color:#2548b1;font-weight:700}.stage .done{color:var(--green)}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.stat{padding:14px 16px}.stat small{color:var(--muted);font-size:14px}.stat strong{display:block;font-size:24px;line-height:1.3}.workspace{display:grid;grid-template-columns:minmax(210px, .75fr) minmax(0,2fr);gap:15px;align-items:start}.list{padding:9px;display:grid;gap:4px}.list button,.project-entry{border:0;border-radius:8px;background:transparent;color:var(--ink);text-align:left;padding:10px 11px}.list button{display:flex;justify-content:space-between;align-items:center;gap:8px}.list button:hover,.list button.active{background:var(--pale);color:#2446ae}.count{font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;text-align:left}th,td{padding:11px 19px;border-bottom:1px solid var(--line)}th{background:#f7f9fd;color:var(--muted);font-size:14px;font-weight:650}tr:last-child td{border-bottom:0}th:last-child,td:last-child{text-align:right;white-space:nowrap}.search{max-width:240px;padding:6px 10px!important;min-height:36px!important}.files{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:9px}.file{border:1px solid var(--line);background:#f8faff;border-radius:9px;padding:10px;text-align:left;color:var(--ink)}.file:hover:not(:disabled){border-color:#9bb3ff;background:var(--pale)}.file span{display:block;font-size:13px;color:var(--muted);overflow-wrap:anywhere}.empty{padding:28px 20px;color:var(--muted);text-align:center}.form{display:grid;gap:15px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.field{display:grid;gap:5px}.field span{font-size:14px;font-weight:650}input,textarea,select{width:100%;color:var(--ink);background:#fff;border:1px solid #cfd9e8;border-radius:8px;padding:8px 10px;min-height:41px}textarea{resize:vertical;min-height:82px}.notice{padding:12px 15px;border-radius:9px;background:#eaf0ff;font-size:14px;color:#294a9e}.notice.success{background:#e2f5ee;color:var(--green)}.notice.error{background:#ffe9e8;color:#922d2d}.project-entry{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);width:100%}.project-entry:hover{background:#f7f9ff}.project-entry span{display:block;margin-top:3px;color:var(--muted);font-size:14px}.ad{display:grid;gap:9px;border:1px solid var(--line);border-radius:9px;padding:14px;background:#f8faff}.ad strong{color:#2649ae}.pills{display:flex;flex-wrap:wrap;gap:6px}.pill{padding:4px 9px;border-radius:6px;background:#edf2fa;font-size:14px;overflow-wrap:anywhere}.pill.neg{background:#fff0ed;color:#8b4236}.params{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}.params span{display:block;color:var(--muted);font-size:14px}.params strong{overflow-wrap:anywhere}.actionbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}dialog{border:1px solid var(--line);border-radius:14px;width:min(560px,calc(100% - 24px));padding:22px;color:var(--ink);box-shadow:0 15px 65px #12244330}dialog::backdrop{background:#101d39aa}.toast{position:fixed;right:18px;bottom:18px;z-index:5;max-width:min(420px,calc(100% - 36px));padding:12px 16px;background:#12243f;color:white;border-radius:10px;box-shadow:0 5px 25px #12244338}.toast[hidden]{display:none}
+@media(max-width:900px){.app{grid-template-columns:185px minmax(0,1fr)}.workspace{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:640px){.app{display:block}aside{padding:10px 12px;gap:8px}.nav{display:flex;flex-wrap:wrap}.nav button{padding:6px 8px}.side-project,.side-note{display:none}.topbar{min-height:52px}.stage{grid-template-columns:1fr 1fr}.stage span{border-bottom:1px solid var(--line)}.form-grid{grid-template-columns:1fr}.page{padding-top:20px}}
+[hidden]{display:none!important}fieldset.form-grid{min-width:0;margin:0;padding:0;border:0}details>summary{cursor:pointer;font-weight:650}details[open]>summary{margin-bottom:12px}.params .wide{grid-column:1 / -1}.details-list{margin:0;padding-left:22px;overflow-wrap:anywhere}.subsection{border-top:1px solid var(--line);padding-top:12px}.field strong{padding:9px 0}.notice ul{margin:7px 0 0;padding-left:22px;overflow-wrap:anywhere}dialog{max-height:calc(100vh - 24px);overflow:auto}</style>
+</head>
+<body>
+<div class="app">
+<aside>
+<div class="brand"><span class="brand-symbol" id="brand-symbol"></span><strong>Ключник</strong></div>
+<nav class="nav" id="nav" aria-label="Основное меню"></nav>
+<div class="side-project" id="side-project"></div>
+<div class="side-note">Поисковые кампании</div>
+</aside>
+<main><header class="topbar"><span id="breadcrumb"></span><button type="button" class="btn small" id="mode-badge" data-action="n8n-settings" disabled>Демо-режим</button></header><div class="page" id="page"></div></main>
+</div>
+<dialog id="dialog"></dialog><div class="toast" id="toast" role="status" hidden></div>
+<input type="file" id="csv-input" accept=".csv,text/csv" multiple hidden>
+<script>
+'use strict';
+const q = (selector) => document.querySelector(selector);
+const icons = {
+  key:'<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9m-3 3 3 3m-6 0 2 2"/>',
+  folder:'<path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/>',
+  campaign:'<path d="M3 10v4h4l11 4V6L7 10zm4 4 2 6m12-10v4"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  upload:'<path d="M12 16V4m-5 5 5-5 5 5M4 16v4h16v-4"/>'
+};
+function icon(name){return '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+icons[name]+'</svg>';}
+function esc(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[char]);}
+function trim(value){return String(value??'').trim();}
+function number(value){return new Intl.NumberFormat('ru-RU').format(value);}
+function money(value){return value ? number(value)+' ₽ / мес.' : 'Не указан';}
+const files = [
+  ['01_all_phrases.csv','Все собранные фразы'],
+  ['02_empty_phrases.csv','Пустышки'],
+  ['03_clean_no_empty.csv','Без пустышек'],
+  ['04_irrelevant.csv','Нерелевантные фразы'],
+  ['05_final_clean.csv','Итоговая семантика']
+];
+const statusText={review:'На проверке',revision:'На доработке',approved:'Подтверждена',sent:'Передана в Директ · демо'};
+const storageKey='klyuchnik.workspace.v1';
+function projectRecord(fields){return {...fields,id:globalThis.crypto?.randomUUID?.()??String(Date.now()),data:null,clusters:[],campaign:null};}
+function workspaceDefaults(){
+  const p=projectRecord({name:'Натяжные потолки',niche:'Замер и монтаж натяжных потолков',masks:['монтаж потолков','потолки с подсветкой','потолки для кухни'],region:'Казань',budget:30000,url:'https://example.com/potolki'});
+  p.data=demoData(p);
+  p.clusters=cluster(p.data.result,p.masks);
+  return {projects:[p],active:p.id};
+}
+function load(){
+  try{const saved=JSON.parse(localStorage.getItem(storageKey));if(Array.isArray(saved?.projects)&&saved.projects.length)return saved;}catch{}
+  return workspaceDefaults();
+}
+const state=load();
+let agentAvailable=false;
+let bridgeReady=false;
+let n8nStatus={};
+let agentJob=null;
+const pendingKey='klyuchnik.wordstat.job';
+
+let page='semantics',selectedCluster=0,selectedGroup=0,query='',toastTimer;
+const project=()=>state.projects.find(item=>item.id===state.active)??state.projects[0];
+function save(){
+  try{localStorage.setItem(storageKey,JSON.stringify(state));}
+  catch{notify('Браузер не смог сохранить изменения. Они доступны до закрытия страницы.');}
+}
+function notify(text){
+  clearTimeout(toastTimer);
+  q('#toast').textContent=text;q('#toast').hidden=false;
+  toastTimer=setTimeout(()=>{q('#toast').hidden=true;},5000);
+}
+function button(label,action,options={}){
+  return '<button class="btn '+(options.primary?'primary ':'')+(options.small?'small':'')+'" type="button" data-action="'+action+'"'+(options.disabled?' disabled':'')+'>'+(options.icon?icon(options.icon):'')+esc(label)+'</button>';
+}
+function demoData(p){
+  const example=p.masks.join('|')==='монтаж потолков|потолки с подсветкой|потолки для кухни';
+  const phrases=example ? [
+    ['монтаж натяжных потолков',320],['установка натяжного потолка',180],['монтаж потолков цена',140],
+    ['натяжные потолки с подсветкой',210],['потолок с подсветкой цена',96],
+    ['натяжные потолки для кухни',170],['потолки для кухни монтаж',65]
+  ] : p.masks.flatMap((mask,index)=>[[mask,220-index*12],[mask+' цена',120-index*5],[mask+' заказать',65-index*2]]);
+  const result=phrases.map(([phrase,freq])=>({phrase,freq}));
+  const empty=[{phrase:p.masks[0]+' редко',freq:0}];
+  const irrelevant=[{phrase:p.masks[0]+' вакансии',freq:52},{phrase:p.masks[0]+' своими руками',freq:70}];
+  const noEmpty=[...result,...irrelevant];
+  return {kind:'demo',result,files:[[...noEmpty,...empty],empty,noEmpty,irrelevant,result].map(csvRows)};
+}
+function csvRows(rows){
+  const cell=value=>'"'+String(value).replaceAll('"','""')+'"';
+  return 'phrase,freq\r\n'+rows.map(row=>cell(row.phrase)+','+row.freq).join('\r\n');
+}
+function parseCsv(text){
+  const source=text.replace(/^\uFEFF/,'');
+  const first=source.split(/\r?\n/,1)[0];
+  const delimiter=first.includes(';')?';':first.includes('\t')?'\t':',';
+  const records=[];let record=[],cell='',quoted=false;
+  for(let i=0;i<source.length;i++){
+    const ch=source[i];
+    if(ch==='"'){
+      if(quoted&&source[i+1]==='"'){cell+='"';i++;}else{quoted=!quoted;}
+    }else if(!quoted&&ch===delimiter){record.push(cell);cell='';}
+    else if(!quoted&&(ch==='\n'||ch==='\r')){
+      if(ch==='\r'&&source[i+1]==='\n')i++;
+      records.push([...record,cell]);record=[];cell='';
+    }else{cell+=ch;}
+  }
+  if(quoted)throw Error('Незакрытые кавычки в CSV.');
+  if(record.length||cell)records.push([...record,cell]);
+  return records;
+}
+function finalRows(text){
+  if(!text.trim())return [];
+  const [header,...records]=parseCsv(text);
+  const fields=(header??[]).map(value=>value.trim().toLowerCase());
+  const phrase=fields.findIndex(value=>['phrase','keyword','фраза','ключевая фраза'].includes(value));
+  const freq=fields.findIndex(value=>['freq','frequency','count','частотность'].includes(value));
+  if(phrase<0||freq<0)throw Error('В итоговом CSV нужны колонки phrase и freq.');
+  const result=new Map();
+  for(const record of records){
+    const value=trim(record[phrase]);
+    const raw=trim(record[freq]).replace(/[\s\u00a0]/g,'');
+    if(!value||value.startsWith('__'))continue;
+    if(!/^\d+$/.test(raw)||!Number.isSafeInteger(Number(raw)))throw Error('Некорректная частотность для фразы «'+value+'».');
+    const key=value.toLowerCase(),previous=result.get(key);
+    if(Number(raw)>0&&(!previous||previous.freq<Number(raw)))result.set(key,{phrase:value,freq:Number(raw)});
+  }
+  return [...result.values()];
+}
+function terms(value){
+  const stop = new Set(['и','на','для','по','с','в','у','из','за','до']);
+  return new Set(value.toLowerCase().replaceAll('ё','е').split(/[^\p{L}\p{N}]+/u).filter(word=>word&&!stop.has(word)).map(word=>word.length>5?word.slice(0,5):word));
+}
+function cluster(rows,masks){
+  const groups=masks.map((name,i)=>({name:name[0].toUpperCase()+name.slice(1),mask:name.toLowerCase(),terms:terms(name),rows:[],index:i}));
+  const other={name:'Прочие запросы',rows:[]};
+  for(const row of rows){
+    const words=terms(row.phrase);
+    const ranked=groups.map(group=>{
+      const score=[...group.terms].filter(word=>words.has(word)).length;
+      return {group,score,ratio:score/group.terms.size,exact:row.phrase.toLowerCase().includes(group.mask)};
+    }).filter(item=>item.score>0).sort((a,b)=>b.score-a.score||b.ratio-a.ratio||Number(b.exact)-Number(a.exact)||a.group.index-b.group.index);
+    (ranked[0]?.group??other).rows.push(row);
+  }
+  return [...groups,other].filter(group=>group.rows.length).map(group=>({name:group.name,rows:group.rows.sort((a,b)=>b.freq-a.freq||a.phrase.localeCompare(b.phrase,'ru'))}));
+}
+const periods={week:'в неделю',month:'в месяц'};
+function defaultBrief(p){
+  return {budget:p.budget||'',period:'month',counter:'',goal:'',instruction:'',site:p.url||'',optimize:'auto'};
+}
+function campaignBrief(p,c){
+  const old=c?.brief;
+  return {...defaultBrief(p),...old,optimize:old?.optimize??(old?.preset==='leads'?'leads':'auto')};
+}
+function wishParts(text){
+  return text.replace(/([».!])\s+(?=[А-ЯЁ])/g,'$1\n').split(/[\r\n]+/).map(line=>trim(line).replace(/[.!?]$/,'')).filter(Boolean);
+}
+function decodeWish(line){
+  const old=line.match(/^(расписание|минус-фразы|отдельная группа|добавить в текст|убрать из текста|utm|бюджет|регион|гео):\s*(.+)$/i);
+  if(old)return [old[1].toLowerCase(),old[2]];
+  const patterns=[
+    ['отдельная группа',/^(?:вынеси(?:те)?|выдели(?:те)?)\s+(.+?)\s+(?:в отдельную группу|отдельно)$/i],
+    ['отдельная группа',/^(.+?)\s+(?:вынеси(?:те)?|выдели(?:те)?)\s+(?:в отдельную группу|отдельно)$/i],
+    ['минус-фразы',/^(?:добавь(?:те)?|включи(?:те)?)\s+(.+?)\s+в (?:общие )?минус-фразы$/i],
+    ['минус-фразы',/^(?:исключи(?:те)?|минусуй(?:те)?)\s+(.+)$/i],
+    ['добавить в текст',/^(?:в объявлениях\s+)?(?:упомяни(?:те)?|добавь(?:те)? в (?:текст|объявлени[яе]))\s+(.+)$/i],
+    ['убрать из текста',/^(?:в объявлениях\s+)?(?:не обещай(?:те)?|не упоминай(?:те)?|убери(?:те)?(?: из (?:текста|объявлений))?)\s+(.+)$/i],
+    ['расписание',/^(?:(?:показы|показывай(?:те)?|показывать)(?:\s+рекламу)?\s+)?(?:только\s+)?((?:по\s+)?будням|по будням|будни|каждый день|круглосуточно)(.*)$/i],
+    ['бюджет',/^(?:бюджет\s+)?([\d ]+\s*(?:₽|рублей)?\s*в (?:неделю|месяц))$/i],
+    ['регион',/^(?:гео|регион|география)\s+(.+)$/i],
+    ['заявки',/^(?:(?:хочу|нужны|цель —)\s+заявки|(?:оптимизируй(?:те)?|оптимизация)\s+(?:под|на|для)\s+(?:заявок|заявки|конверсии))$/i]
+  ];
+  for(const [key,pattern] of patterns){
+    const match=line.match(pattern);
+    if(!match)continue;
+    if(key==='расписание'){
+      const days=/будн/i.test(match[1])?'будни':match[1].toLowerCase();
+      const raw=trim(match[2]).replace(/^с\s+/i,'').replace(/\s+до\s+/i,'–');
+      const times=raw.replace(/(^|[–—-]\s*)(\d{1,2})(?::(\d{2}))?(?=\s*[–—-]|$)/g,(_,lead,hour,minute)=>lead+hour.padStart(2,'0')+':'+(minute??'00'));
+      return [key,[days,times].filter(Boolean).join(' ')];
+    }
+    return [key,(match[1]??'').trim()];
+  }
+  return null;
+}
+function buildBrief(p,brief){
+  const settings={placement:'Поисковая выдача',region:p.region, strategy:'Максимум кликов',
+    budget:brief.budget,period:brief.period,schedule:'Каждый день, круглосуточно',
+    counter:brief.counter,goal:brief.goal,negative:[],utm:'utm_source=yandex&utm_medium=cpc&utm_campaign={campaign_id}&utm_content={ad_id}&utm_term={keyword}'};
+  const problems=[], split=[], add=[], remove=[];
+  let wantsLeads=brief.optimize==='leads';
+  for(const line of wishParts(brief.instruction)){
+    const command=decodeWish(line);
+    if(!command){problems.push('Не удалось применить пожелание «'+line+'». Уточните или удалите его.');continue;}
+    const [key,input]=command;
+    const value=input.replace(/^[«“"]|[»”"]$/g,'').trim();
+    switch(key){
+      case 'расписание': {
+        const time=value.match(/^(будни|каждый день)\s+(\d{2}):(\d{2})\s*[-–—]\s*(\d{2}):(\d{2})$/i);
+        if(/^(круглосуточно|каждый день)$/i.test(value)){settings.schedule='Каждый день, круглосуточно';break;}
+        if(/^будни$/i.test(value)){settings.schedule='Будни, круглосуточно';break;}
+        if(!time||+time[2]>23||+time[4]>23||+time[3]>59||+time[5]>59||(+time[2]*60+ +time[3])>=(+time[4]*60+ +time[5])){
+          problems.push('Укажите расписание в виде «будни 09:00–19:00» или «круглосуточно».');break;
+        }
+        settings.schedule=time[1]+' '+time[2]+':'+time[3]+'–'+time[4]+':'+time[5];
+        break;
+      }
+      case 'минус-фразы': settings.negative.push(...input.split(/[,;]/).map(item=>trim(item).replace(/^[«“"]|[»”"]$/g,'')).filter(Boolean));break;
+      case 'отдельная группа': split.push(value.trim());break;
+      case 'добавить в текст': add.push(value.trim());break;
+      case 'убрать из текста': remove.push(value.trim());break;
+      case 'utm': settings.utm=value.trim().replace(/^\?/,'');break;
+      case 'заявки': wantsLeads=true;break;
+      case 'бюджет': {
+        const amount=value.match(/^([\d\s]+)\s*(?:₽|рублей)?\s*(в неделю|в месяц)$/i);
+        if(!amount||Number(amount[1].replace(/\s/g,''))!==brief.budget||amount[2].toLowerCase()!==periods[brief.period]){
+          problems.push('Бюджет в задании («'+value+'») должен совпадать с полем бюджета и выбранным периодом.');
+        }
+        break;
+      }
+      case 'регион':
+      case 'гео':
+        if(value.toLowerCase()!==(p.region||'Все регионы').toLowerCase())problems.push('Регион «'+value+'» отличается от региона сбора. Измените регион в проекте или уточните задание.');
+        break;
+      default: problems.push('Уточните команду «'+line+'».');
+    }
+  }
+  settings.negative=[...new Set(settings.negative)];
+  if(!settings.budget)problems.push('Укажите бюджет и период.');
+  wantsLeads=brief.optimize!=='clicks'&&(wantsLeads||Boolean(brief.counter||brief.goal));
+  if(wantsLeads){
+    settings.strategy='Максимум конверсий';
+    if(!brief.counter||!brief.goal)problems.push('Для оптимизации под заявки укажите счётчик и цель Метрики или продолжите на кликах.');
+  }else{
+    settings.counter='';settings.goal='';
+  }
+  settings.site=brief.site;
+  return {settings,problems,split,add,remove,needsGoal:wantsLeads&&(!brief.counter||!brief.goal)};
+}
+function editCampaignInputs(p){
+  const c=p.campaign;
+  const brief=campaignBrief(p,c);
+  const periodsMarkup=Object.entries(periods).map(([id,label])=>'<option value="'+id+'"'+(id===brief.period?' selected':'')+'>'+label+'</option>').join('');
+  showDialog('Данные для кампании',
+    '<div class="form-grid">'+field('budget','Бюджет, ₽',brief.budget,'type="number" min="1" max="1000000000"')+
+    '<label class="field"><span>Период бюджета</span><select name="period">'+periodsMarkup+'</select></label></div>'+
+    field('site','Посадочная страница',brief.site,'type="url" maxlength="500"'),
+    'Сохранить',data=>{
+      const site=trim(data.get('site'));
+      if(site&&!allowedUrl(site)){notify('Укажите ссылку с http:// или https://.');return false;}
+      reviseDraft(p,{budget:Number(data.get('budget')),period:data.get('period'),site});
+    });
+}
+function editGoal(p){
+  const brief=campaignBrief(p,p.campaign);
+  showDialog('Цель Метрики',
+    field('counter','ID счётчика Метрики',brief.counter,'required inputmode="numeric" pattern="[0-9]{1,20}"')+
+    field('goal','ID цели Метрики',brief.goal,'required inputmode="numeric" pattern="[0-9]{1,20}"'),
+    'Сохранить',data=>reviseDraft(p,{counter:trim(data.get('counter')),goal:trim(data.get('goal')),optimize:'leads'}));
+}
+function reviseDraft(p,updates){
+  p.campaign=draft(p,p.campaign,{...campaignBrief(p,p.campaign),...updates});
+  selectedGroup=0;save();render();
+}
+function changeSummary(before,after){
+  if(!before)return [];
+  const changes=[];
+  const oldSettings=before.settings??{};
+  const titles={strategy:'Стратегия',site:'Посадочная страница',budget:'Бюджет',period:'Период бюджета',schedule:'Расписание',negative:'Общие минус-фразы',counter:'Счётчик Метрики',goal:'Цель Метрики',utm:'UTM'};
+  for(const [key,label] of Object.entries(titles)){
+    if(JSON.stringify(oldSettings[key])!==JSON.stringify(after.settings[key]))changes.push('Кампания · '+label+' — '+(key==='period'?periods[after.settings[key]]:key==='budget'?after.settings[key]||'Уточнить':[].concat(after.settings[key]).filter(Boolean).join(', ')||'Не задано'));
+  }
+  const oldGroups=new Map(before.groups.map(group=>[group.name,group]));
+  for(const group of after.groups){
+    const old=oldGroups.get(group.name);
+    if(!old){changes.push('Новая группа · '+group.name);continue;}
+    const fields={keywords:'ключевые фразы',negative:'минус-фразы',title:'заголовок',description:'текст объявления',url:'посадочная страница'};
+    const edited=Object.keys(fields).filter(key=>JSON.stringify(old[key])!==JSON.stringify(group[key])).map(key=>fields[key]);
+    if(edited.length)changes.push(group.name+' · '+edited.join(', '));
+    oldGroups.delete(group.name);
+  }
+  for(const name of oldGroups.keys())changes.push('Группа удалена · '+name);
+  return changes;
+}
+function campaignBasis(c){return JSON.parse(JSON.stringify({settings:c.settings,groups:c.groups}));}
+function draft(p,old,brief=campaignBrief(p,old)){
+  const {settings,problems,split,add,remove,needsGoal}=buildBrief(p,brief);
+  const oldGroups=new Map(old?.groups.map(group=>[group.name,group])??[]);
+  const oldSite=campaignBrief(p,old).site;
+  const adFields=(saved,name)=>({
+    title:saved?.textBasis?.title??saved?.title??name,
+    description:saved?.textBasis?.description??saved?.description??p.niche,
+    url:saved?.url&&saved.url!==oldSite?saved.url:brief.site
+  });
+  const clusterNames=new Set(p.clusters.map(group=>group.name));
+  const splitPhrases=new Set(old?.groups.flatMap(group=>group.splitFrom??(clusterNames.has(group.name)?[]:group.keywords))??[]);
+  let groups=p.clusters.map(group=>{
+    const existing=oldGroups.get(group.name);
+    return {name:group.name,keywords:[...new Set([...(existing?.keywords??group.rows.map(row=>row.phrase)),...group.rows.filter(row=>splitPhrases.has(row.phrase)).map(row=>row.phrase)])],
+      negative:existing?.negative??[],...adFields(existing,group.name)};
+  });
+  const used=new Set();
+  for(const name of split){
+    if(used.has(name.toLowerCase()))continue;
+    used.add(name.toLowerCase());
+    const words=terms(name);
+    const matches=phrase=>words.size>0&&[...words].every(word=>terms(phrase).has(word));
+    const exact=groups.find(group=>group.name.toLowerCase()===name.toLowerCase());
+    const moved=[];
+    const prior=oldGroups.get(name);
+    const extras=prior?.keywords.filter(phrase=>!p.data?.result.some(row=>row.phrase===phrase))??[];
+    const keywords=new Set([...(exact?.keywords??[]),...extras]);
+    for(const group of groups){
+      if(group===exact)continue;
+      group.keywords=group.keywords.filter(phrase=>{
+        if(!matches(phrase))return true;
+        keywords.add(phrase);moved.push(phrase);return false;
+      });
+    }
+    if(!keywords.size){problems.push('Для отдельной группы «'+name+'» нет подходящих фраз.');continue;}
+    if(exact){exact.keywords=[...keywords];exact.splitFrom=[...(exact.splitFrom??[]),...moved];continue;}
+    groups.push({name,keywords:[...keywords],splitFrom:moved,negative:prior?.negative??[],...adFields(prior,name)});
+  }
+  groups=groups.filter(group=>group.keywords.length);
+  for(const group of groups){
+    group.textBasis={title:group.title,description:group.description};
+    for(const value of add){
+      if(!group.description.toLowerCase().includes(value.toLowerCase()))group.description=group.description?group.description.replace(/[.!?]+$/,'')+'. '+value:value;
+    }
+    for(const value of remove){
+      const literal=new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'giu');
+      group.title=group.title.replace(literal,'').replace(/\s+/g,' ').trim();
+      group.description=group.description.replace(literal,'').replace(/\s+/g,' ').replace(/^[\s.,;:!?]+|[\s,;:]+$/g,'').trim();
+    }
+  }
+  const result={status:'review',feedback:old?.feedback??'',version:(old?.version??0)+1,created:null,groups,settings,brief,problems,needsGoal};
+  result.changes=changeSummary(old?.baseline??old,result);
+  return result;
+}
+function download(name,data,type){
+  const url=URL.createObjectURL(new Blob([data],{type})),link=document.createElement('a');
+  link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+function stage(p){
+  const index=({projects:0,semantics:1,campaign:p.campaign?.status==='sent'?3:2})[page]??0;
+  return '<div class="stage" aria-label="Этапы проекта">'+['Проект','Семантика','Кампания','Передача'].map((name,i)=>'<span class="'+(i===index?'current':i<index?'done':'')+'">'+esc(name)+'</span>').join('')+'</div>';
+}
+function head(title,subtitle,actions=''){return '<div class="page-head"><div><h1>'+esc(title)+'</h1><p>'+esc(subtitle)+'</p></div><div class="row">'+actions+'</div></div>';}
+function shell(){
+  const p=project();
+  const button=q('#mode-badge');
+  button.disabled=!bridgeReady;
+  button.textContent=agentAvailable?'Настройки n8n':bridgeReady?'Подключить n8n':'Демо-режим';
+  q('#brand-symbol').innerHTML=icon('key');
+  q('#nav').innerHTML=[['projects','Проекты','folder'],['semantics','Семантика','search'],['campaign','Кампания','campaign']].map(([key,label,symbol])=>'<button type="button" data-action="nav-'+key+'"'+(page===key||page==='new'&&key==='projects'?' aria-current="page"':'')+'>'+icon(symbol)+esc(label)+'</button>').join('');
+  q('#side-project').innerHTML='Текущий проект<strong>'+esc(p.name)+'</strong>';
+  q('#breadcrumb').textContent=page==='projects'||page==='new'?'Рабочее пространство':'Проекты / '+p.name;
+}
+function projectsPage(){
+  return head('Проекты','Подготовка поисковой рекламы для Яндекс Директа',button('Новый проект','new',{primary:true,icon:'plus'}))+
+    '<section class="card pad stack"><h2>Ваши проекты</h2>'+state.projects.map(p=>'<button type="button" class="project-entry" data-action="open" data-id="'+esc(p.id)+'"><div><strong>'+esc(p.name)+'</strong><span>'+esc(p.region||'Все регионы')+' · '+esc(money(p.budget))+'</span></div><span class="badge">'+esc(statusText[p.campaign?.status]??(p.data?'Семантика собрана':'Новый'))+'</span></button>').join('')+'</section>';
+}
+function field(name,label,value='',attrs=''){return '<label class="field"><span>'+label+'</span><input name="'+name+'" value="'+esc(value)+'" '+attrs+'></label>';}
+function projectForm(){
+  return head('Новый проект','Введите данные для сбора семантики и подготовки кампании.')+
+    '<form class="card pad form" id="project-form">'+
+    field('name','Название проекта','','required maxlength="100"')+
+    '<label class="field"><span>Тематика или описание бизнеса</span><textarea name="niche" required maxlength="500"></textarea></label>'+
+    '<label class="field"><span>Базовые маски</span><textarea name="masks" required placeholder="Одна фраза на строку" maxlength="1000"></textarea></label>'+
+    '<div class="form-grid">'+field('region','Регион показа','','placeholder="Пустое поле — все регионы" maxlength="80"')+field('budget','Бюджет на месяц, ₽','','type="number" min="1" max="1000000000"')+'</div>'+
+    field('url','Посадочная страница','','type="url" placeholder="https://example.com/" maxlength="500"')+
+    '<div class="actionbar">'+button('Отмена','nav-projects')+'<button class="btn primary" type="submit">Создать проект</button></div></form>';
+}
+function stats(p){
+  const source=p.data;
+  const counts=source.files.map((file,i)=>i===4?source.result.length:file===null?'—':Math.max(parseCsv(file).length-1,0));
+  return '<div class="stats">'+[['Собрано',counts[0]],['Пустышки',counts[1]],['Нерелевантные',counts[3]],['Итоговые фразы',counts[4]]].map(([label,count])=>'<div class="card stat"><small>'+label+'</small><strong>'+esc(typeof count==='number'?number(count):count)+'</strong></div>').join('')+'</div>';
+}
+function rowsMarkup(rows){
+  const filtered=rows.filter(row=>row.phrase.toLowerCase().includes(query.toLowerCase()));
+  if(!filtered.length)return '<p class="empty">'+(query?'По запросу ничего не найдено.':'Релевантных фраз нет.')+'</p>';
+  const content=filtered.slice(0,200).map(row=>'<tr><td>'+esc(row.phrase)+'</td><td>'+number(row.freq)+'</td></tr>').join('');
+  return '<div class="tablewrap"><table><thead><tr><th>Ключевая фраза</th><th>Частотность</th></tr></thead><tbody>'+content+'</tbody></table></div>'+(filtered.length>200?'<p class="pad muted smalltext">Показано 200 из '+number(filtered.length)+' фраз. Полный список доступен в CSV.</p>':'');
+}
+function semanticsPage(p){
+  const data=p.data;
+  const collecting=agentJob?.projectId===p.id;
+  const agentStatus=collecting?'<div class="notice" role="status">n8n собирает фразы и проверяет релевантность. Результат появится здесь после завершения.</div>':
+    p.agentError?'<div class="notice error" role="status">'+esc(p.agentError)+'</div>':
+    data?.warning?'<div class="notice" role="status">'+esc(data.warning)+'</div>':'';
+  const imported=data?.kind==='import'||data?.kind==='wordstat';
+  const current=p.clusters[selectedCluster];
+  const title=current?.name??'Очищенные фразы';
+  const rows=current?.rows??data?.result??[];
+  const filters=p.clusters.length?
+    '<section class="card"><div class="card-head"><h2>Кластеры</h2></div><div class="list">'+p.clusters.map((group,i)=>'<button type="button" data-action="cluster-select" data-index="'+i+'"'+(i===selectedCluster?' class="active" aria-pressed="true"':' aria-pressed="false"')+'>'+esc(group.name)+'<span class="count">'+number(group.rows.length)+'</span></button>').join('')+'</div></section>':'<section class="card pad stack"><h2>Кластеры</h2><p class="muted">Очищенные фразы можно сгруппировать по базовым маскам проекта.</p></section>';
+  return head('Семантика',p.name,button('Изменить регион','change-region',{disabled:collecting})+button('Импорт CSV','import',{icon:'upload',disabled:collecting})+button(collecting?'Сбор выполняется':'Собрать семантику','collect',{primary:true,disabled:!!agentJob}))+
+    stage(p)+(bridgeReady&&agentAvailable?'<p class="muted smalltext">Агент n8n · '+esc(n8nStatus.name)+'</p>':'')+agentStatus+(data?'<div class="row spread"><span class="badge '+(imported?'green':'')+'">'+(data.kind==='wordstat'?'Сбор из Wordstat':imported?'Результаты из n8n':'Демонстрационные данные')+'</span><div class="row">'+button('Кластеризовать','cluster',{disabled:collecting||!data.result.length})+button(p.campaign?'Открыть кампанию':'Подготовить кампанию','generate',{primary:true,disabled:collecting||!p.clusters.length})+'</div></div>'+
+    stats(p)+'<div class="workspace">'+filters+'<section class="card"><div class="card-head"><h2>'+esc(title)+'</h2><input id="query" class="search" type="search" aria-label="Поиск по фразам" placeholder="Поиск по фразам" value="'+esc(query)+'"></div><div id="rows">'+rowsMarkup(rows)+'</div></section></div>'+
+    '<section class="card pad stack"><h2>Файлы сбора и очистки</h2><div class="files">'+files.map(([name,label],i)=>'<button type="button" class="file" data-action="csv-download" data-index="'+i+'"'+(data.files[i]===null?' disabled':'')+'><strong>'+label+'</strong><span>'+name+'</span></button>').join('')+'</div></section>':
+    '<section class="card empty">'+(agentAvailable?'Запустите сбор в Wordstat или загрузите CSV из n8n.':'Запустите демонстрационный сбор или загрузите CSV из n8n.')+' Для кластеризации нужен <strong>05_final_clean.csv</strong>.</section>');
+}
+function campaignPage(p){
+  const c=p.campaign;
+  if(!c)return head('Кампания',p.name)+stage(p)+'<section class="card pad stack"><h2>Кампания ещё не сформирована</h2><p class="muted">Соберите семантику, сформируйте кластеры и создайте кампанию.</p><div>'+button('Перейти к семантике','nav-semantics',{primary:true})+'</div></section>';
+  const group=c.groups[selectedGroup]??c.groups[0];
+  const phrases=(items,negative=false)=>items.length?'<div class="pills">'+items.map(item=>'<span class="pill'+(negative?' neg':'')+'">'+esc(item)+'</span>').join('')+'</div>':'<p class="muted smalltext">Список пуст</p>';
+  const href=allowedUrl(group.url);
+  const review=c.status==='review'||c.status==='revision';
+  const brief=campaignBrief(p,c);
+  const settings=c.settings??buildBrief(p,brief).settings;
+  const missing=[
+    ...(c.problems??(review?buildBrief(p,brief).problems:[])),
+    ...(!allowedUrl(brief.site)&&c.groups.some(item=>!allowedUrl(item.url))?['Укажите сайт или посадочную ссылку для каждой группы.']:[]),
+    ...c.groups.filter(item=>!item.title||!item.description).map(item=>'«'+item.name+'» — проверьте заголовок и текст объявления.')
+  ];
+  const needsGoal=c.needsGoal??buildBrief(p,brief).needsGoal;
+  const needsInputs=!settings.budget||!allowedUrl(brief.site);
+  const clarify=(needsInputs?button('Указать бюджет или сайт','campaign-inputs',{small:true}):'')+
+    (needsGoal?button('Указать цель Метрики','campaign-goal',{small:true})+button('Продолжить на кликах','campaign-clicks',{small:true}):'');
+  const issues=missing.length&&review?'<section class="notice error"><strong>Требует уточнения</strong><ul>'+missing.map(item=>'<li>'+esc(item)+'</li>').join('')+'</ul>'+(clarify?'<div class="row subsection">'+clarify+'</div>':'')+'</section>':'';
+  const changes=c.changes&&(c.version>1||c.changes.length)?'<details class="card pad"><summary>Изменения в версии '+number(c.version)+'</summary>'+
+    (c.changes.length?'<ul class="details-list">'+c.changes.map(item=>'<li>'+esc(item)+'</li>').join('')+'</ul>':'<p class="muted smalltext">Параметры, группы и объявления совпадают с предыдущей версией.</p>')+'</details>':'';
+  const budget=settings.budget?number(settings.budget)+' ₽ '+periods[settings.period]:'Уточнить';
+  const setting=(label,value,wide=false)=>'<div'+(wide?' class="wide"':'')+'><span>'+label+'</span><strong>'+esc(value)+'</strong></div>';
+  const settingsCard='<section class="card pad stack"><div class="row spread"><h2>Настройки кампании</h2>'+
+    (review?'<div class="row">'+button('Бюджет и сайт','campaign-inputs',{small:true})+button('Цель Метрики','campaign-goal',{small:true})+'</div>':'')+'</div><div class="params">'+
+    setting('Места показа',settings.placement)+setting('Стратегия',settings.strategy)+setting('Бюджет',budget)+
+    setting('Регион из проекта',settings.region||'Все регионы')+
+    setting('Группы и объявления',number(c.groups.length)+' / '+number(c.groups.length))+'</div>'+
+    '<details><summary>Расписание, минус-фразы, Метрика и UTM</summary><div class="params">'+
+    setting('Расписание показов',settings.schedule)+setting('Общие минус-фразы',settings.negative.join(', ')||'Не заданы')+
+    (settings.counter||settings.goal?setting('Счётчик Метрики',settings.counter||'Уточнить')+setting('Цель Метрики',settings.goal||'Уточнить'):'')+
+    (settings.counter&&review?'<div>'+button('Перейти на клики','campaign-clicks',{small:true})+'</div>':'')+
+    setting('Параметры URL',settings.utm||'Не заданы',true)+'</div></details></section>';
+  const actions=c.status==='review'?
+    button('Вернуть на доработку','reject')+button('Подтвердить','approve',{primary:true,disabled:!!missing.length}):
+    c.status==='revision'?button('Отправить на повторную проверку','resubmit',{primary:true}):
+    c.status==='approved'?button('Передать в Яндекс Директ','send',{primary:true}):button('Скачать пакет кампании','package');
+  const message=c.status==='sent'?'<div class="notice success"><strong>Демонстрационная передача завершена.</strong> Номер операции '+esc(c.created)+'.</div>':
+    c.status==='revision'?'<div class="notice"><strong>Замечания к версии '+number(c.version)+'</strong><div>'+esc(c.feedback)+'</div></div>':
+    c.status==='approved'?'<div class="notice">Кампания подтверждена. Кнопка передачи создаст демонстрационный результат без обращения к Яндекс Директу.</div>':
+    c.feedback?'<div class="notice"><strong>Замечания к предыдущей версии</strong><div>'+esc(c.feedback)+'</div></div>':'';
+  const wishes=review?'<details class="card pad"'+((c.problems??[]).some(issue=>issue.startsWith('Не удалось'))?' open':'')+'><summary>Пожелания к черновику</summary>'+
+    '<form class="form" id="wishes-form"><label class="field"><span>Что изменить</span><textarea name="instruction" rows="3" maxlength="4000" placeholder="Подсветку вынеси отдельно. В объявлениях не обещай скидку.">'+esc(brief.instruction)+'</textarea></label>'+
+    '<p class="muted smalltext">Например: «Показы по будням с 9 до 19», «Исключи вакансии», «Упомяни бесплатный замер». Поддерживаются типовые формулировки.</p>'+
+    '<div class="actionbar"><button class="btn primary" type="submit">Применить пожелания</button></div></form></details>':'';
+  return head('Проверка кампании',p.name,'<span class="badge '+(c.status==='approved'||c.status==='sent'?'green':c.status==='revision'?'amber':'')+'">'+statusText[c.status]+'</span>')+
+    stage(p)+message+issues+settingsCard+wishes+changes+
+    '<div class="workspace"><section class="card"><div class="card-head"><h2>Группы объявлений</h2></div><div class="list">'+
+    c.groups.map((item,i)=>'<button type="button" class="'+(item===group?'active':'')+'" aria-pressed="'+(item===group)+'" data-action="group-select" data-index="'+i+'">'+esc(item.name)+'</button>').join('')+
+    '</div></section><section class="card"><div class="card-head"><h2>'+esc(group.name)+'</h2>'+(review?button('Редактировать группу','edit',{small:true}):'')+'</div>'+
+    '<div class="pad stack"><p class="muted smalltext">Регион группы · '+esc(settings.region||'Все регионы')+' · из проекта</p><h3>Ключевые фразы</h3>'+phrases(group.keywords)+'<h3>Минус-фразы группы</h3>'+phrases(group.negative)+
+    '<div class="ad"><h3>Текстово-графическое объявление</h3><strong>'+esc(group.title)+'</strong><p>'+esc(group.description)+'</p>'+(href?'<a href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+esc(group.url)+'</a>':'<p class="muted smalltext">Посадочная страница не указана</p>')+
+    '</div></div></section></div><div class="actionbar">'+actions+'</div>';
+}
+function render(){
+  const p=project();
+  shell();
+  q('#page').innerHTML=page==='projects'?projectsPage():page==='new'?projectForm():page==='campaign'?campaignPage(p):semanticsPage(p);
+}
+function changePage(target){
+  page=target;query='';render();window.scrollTo(0,0);
+}
+function allowedUrl(value){
+  if(!value)return '';
+  try{const parsed=new URL(value);return ['http:','https:'].includes(parsed.protocol)?parsed.href:'';}catch{return '';}
+}
+function safeReset(p,apply){
+  if(!p.campaign){apply();return;}
+  if(p.campaign.status==='sent'){
+    notify('Переданная кампания сохранена. Для нового сбора создайте другой проект.');
+    return;
+  }
+  showDialog('Заменить семантику проекта?',
+    '<p class="muted">Текущий черновик кампании будет сброшен.</p>',
+    'Заменить',()=>{
+      p.campaign=null;
+      apply();
+    });
+}
+function applyData(p,data){
+  p.data=data;p.clusters=[];
+  if(project()===p){selectedCluster=0;selectedGroup=0;query='';}
+  save();render();
+}
+async function apiRequest(path,options){
+  const response=await fetch(path,{cache:'no-store',...options});
+  let data;
+  try {data=await response.json();} catch {throw Error('Локальный мост ответил в неизвестном формате.');}
+  if(!response.ok){
+    const error=Error(data.message||'Запрос не выполнен.');
+    error.field=data.field;
+    throw error;
+  }
+  return data;
+}
+function openN8nSettings(){
+  const dialog=q('#dialog');
+  dialog.innerHTML='<form class="form"><h2 id="dialog-title">Подключение n8n</h2>'+
+    field('url','Адрес n8n',n8nStatus.url||'http://127.0.0.1:5678','type="url" required')+
+    field('key','API-ключ n8n','','type="password" required autocomplete="off"')+
+    field('name','Точное название воркфлоу',n8nStatus.name||'Kluchnik','required maxlength="128"')+
+    '<div id="folder-setting" hidden>'+field('folderId','Folder ID Yandex Cloud','','maxlength="128"')+'</div>'+
+    '<p class="muted smalltext">Ключ нужен для настройки. Приложение создаст служебную копию агента в вашем n8n.</p>'+
+    '<p id="n8n-error" class="notice error" role="status" hidden></p>'+
+    '<div class="actionbar">'+button('Закрыть','close-dialog')+'<button type="submit" class="btn primary">Подключить</button></div></form>';
+  dialog.setAttribute('aria-labelledby','dialog-title');
+  const form=dialog.querySelector('form');
+  form.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const submit=form.querySelector('button[type="submit"]');
+    const errorBox=form.querySelector('#n8n-error');
+    const data=Object.fromEntries(new FormData(form));
+    submit.disabled=true;submit.textContent='Подключение…';errorBox.hidden=true;
+    try{
+      n8nStatus=await apiRequest('/api/semantics/connect',{method:'POST',
+        headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+      agentAvailable=n8nStatus.available;
+      form.elements.key.value='';
+      if(dialog.open&&dialog.contains(form))dialog.close();
+      render();notify('Агент n8n подключён.');
+    }catch(error){
+      errorBox.textContent=error.message;errorBox.hidden=false;
+      if(error.field==='folderId'){
+        form.querySelector('#folder-setting').hidden=false;
+        form.elements.folderId.required=true;
+        form.elements.folderId.focus();
+      }
+    }finally{submit.disabled=false;submit.textContent='Подключить';}
+  });
+  dialog.showModal();
+}
+function storeAgentJob(job){
+  try{if(job)localStorage.setItem(pendingKey,JSON.stringify(job));else localStorage.removeItem(pendingKey);}catch{}
+}
+function collectWordstat(p){
+  if(p.campaign?.status==='sent'){notify('Для нового сбора создайте другой проект.');return;}
+  const regionField=p.region?field('codes','Коды регионов Wordstat',p.regionCodes?.join(', ')||'','required placeholder="Числа через запятую"'):'';
+  showDialog('Собрать семантику в Wordstat',
+    '<p class="muted smalltext">Регион проекта · '+esc(p.region||'Все регионы')+'. '+(p.region?'Введите коды, соответствующие выбранному региону.':'Сбор пройдёт без регионального фильтра.')+'</p>'+
+    regionField+(p.campaign?'<p class="muted smalltext">После успешного сбора прежний черновик будет сброшен.</p>':''),
+    'Запустить сбор',data=>{
+      const codes=trim(data.get('codes')).split(/[,;\s]+/).filter(Boolean);
+      if(p.region&&(!codes.length||codes.some(code=>!/^\d{1,12}$/.test(code)))){notify('Введите числовые коды регионов Wordstat.');return false;}
+      void startAgent(p,[...new Set(codes)]);
+    });
+}
+async function startAgent(p,codes){
+  const run={projectId:p.id,codes};
+  agentJob=run;p.agentError='';render();
+  try{
+    const reply=await apiRequest('/api/semantics/jobs',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({masks:p.masks,niche:p.niche,regions:codes})});
+    run.id=reply.id;storeAgentJob(run);
+    await pollAgent(run,p);
+  }catch(error){finishAgent(p,error.message);}
+}
+async function pollAgent(run,p){
+  for(;;){
+    const job=await apiRequest('/api/semantics/jobs/'+encodeURIComponent(run.id));
+    if(job.status==='running'){await new Promise(resolve=>setTimeout(resolve,2000));continue;}
+    if(job.status==='error')throw Error(job.message);
+    if(job.status!=='done')throw Error('Получен неизвестный статус сбора.');
+    const contents=files.map(([name])=>job.files?.[name]);
+    if(contents.some(content=>typeof content!=='string'))throw Error('Для результата нужны пять CSV.');
+    for(const content of contents)parseCsv(content);
+    const result=finalRows(contents[4]);
+    p.regionCodes=run.codes;p.campaign=null;
+    finishAgent(p,'',{kind:'wordstat',files:contents,result,warning:job.warning});
+    return;
+  }
+}
+function finishAgent(p,message,data){
+  agentJob=null;storeAgentJob(null);
+  p.agentError=message;
+  if(data){applyData(p,data);notify('Сбор завершён. Итоговых фраз: '+number(data.result.length)+'.');}
+  else {save();render();notify(message);}
+}
+async function connectAgent(){
+  if(!['127.0.0.1','localhost'].includes(location.hostname))return;
+  try{
+    n8nStatus=await apiRequest('/api/semantics/status');
+    bridgeReady=true;agentAvailable=n8nStatus.available===true;
+  }catch{return;}
+  render();
+  if(!agentAvailable)return;
+  try{
+    const run=JSON.parse(localStorage.getItem(pendingKey));
+    const p=state.projects.find(item=>item.id===run?.projectId);
+    if(!run?.id||!p)return;
+    agentJob=run;render();
+    try{await pollAgent(run,p);}catch(error){finishAgent(p,error.message);}
+  }catch{}
+}
+function showDialog(title,content,submit,handler){
+  const dialog=q('#dialog');
+  dialog.innerHTML='<form class="form"><h2 id="dialog-title">'+esc(title)+'</h2>'+content+
+    '<div class="actionbar">'+button('Отмена','close-dialog')+'<button type="submit" class="btn primary">'+esc(submit)+'</button></div></form>';
+  dialog.setAttribute('aria-labelledby','dialog-title');
+  dialog.querySelector('form').addEventListener('submit',event=>{
+    event.preventDefault();
+    const data=new FormData(event.currentTarget);
+    if(handler(data)!==false)dialog.close();
+  });
+  dialog.showModal();
+}
+function listInput(value,limit=100){return [...new Set(String(value??'').split(/[\r\n]+/).map(trim).filter(Boolean))].slice(0,limit);}
+function editGroup(p){
+  const group=p.campaign.groups[selectedGroup];
+  showDialog('Редактирование группы',
+    field('title','Заголовок',group.title,'required maxlength="100"')+
+    '<label class="field"><span>Текст объявления</span><textarea name="description" required maxlength="500">'+esc(group.description)+'</textarea></label>'+
+    field('url','Посадочная страница',group.url,'type="url" maxlength="500"')+
+    '<label class="field"><span>Ключевые фразы · по одной на строку</span><textarea name="keywords" required maxlength="5000">'+esc(group.keywords.join('\n'))+'</textarea></label>'+
+    '<label class="field"><span>Минус-фразы · по одной на строку</span><textarea name="negative" maxlength="5000">'+esc(group.negative.join('\n'))+'</textarea></label>',
+    'Сохранить',data=>{
+      const title=trim(data.get('title')),description=trim(data.get('description')),url=trim(data.get('url'));
+      const keywords=listInput(data.get('keywords'));
+      if(!title||!description||!keywords.length){notify('Заполните заголовок, текст и ключевые фразы.');return false;}
+      if(url&&!allowedUrl(url)){notify('Укажите ссылку с http:// или https://.');return false;}
+      const before=campaignBasis(p.campaign);
+      if(group.textBasis){
+        if(title!==group.title)group.textBasis.title=title;
+        if(description!==group.description)group.textBasis.description=description;
+      }
+      Object.assign(group,{title,description,url,keywords,negative:listInput(data.get('negative'))});
+      if(p.campaign.status==='review'&&p.campaign.settings){
+        p.campaign.changes=[...new Set([...(p.campaign.changes??[]),...changeSummary(before,p.campaign)])];
+      }
+      save();render();
+    });
+}
+document.addEventListener('submit',event=>{
+  if(event.target.id==='wishes-form'){
+    event.preventDefault();
+    const p=project(),data=new FormData(event.target);
+    if(!['review','revision'].includes(p.campaign?.status))return;
+    const instruction=trim(data.get('instruction'));
+    const previous=campaignBrief(p,p.campaign);
+    reviseDraft(p,{instruction,optimize:instruction!==previous.instruction&&previous.optimize==='clicks'?'auto':previous.optimize});
+    return;
+  }
+  if(event.target.id!=='project-form')return;
+  event.preventDefault();
+  const data=new FormData(event.target);
+  const name=trim(data.get('name')),niche=trim(data.get('niche')),url=trim(data.get('url'));
+  const masks=listInput(data.get('masks'),50);
+  if(!name||!niche||!masks.length){notify('Заполните название, тематику и базовые маски.');return;}
+  if(url&&!allowedUrl(url)){notify('Укажите ссылку с http:// или https://.');return;}
+  const p=projectRecord({name,niche,masks,region:trim(data.get('region')),budget:Number(data.get('budget')),url});
+  state.projects.push(p);state.active=p.id;selectedCluster=0;selectedGroup=0;save();changePage('semantics');
+});
+document.addEventListener('click',event=>{
+  const target=event.target.closest('button[data-action]');
+  if(!target||target.disabled)return;
+  const {action,id,index}=target.dataset;
+  const p=project(),c=p.campaign;
+  if(action.startsWith('nav-')){changePage(action.slice(4));return;}
+  switch(action){
+    case 'new': changePage('new');break;
+    case 'open': state.active=id;selectedCluster=0;selectedGroup=0;save();changePage('semantics');break;
+    case 'n8n-settings': if(bridgeReady&&!agentJob)openN8nSettings();break;
+    case 'collect':
+      if(agentJob)break;
+      if(agentAvailable){collectWordstat(p);break;}
+      if(p.data?.kind==='import'&&!p.campaign){
+        showDialog('Загрузить демоданные?','<p class="muted">Демоданные заменят импортированные результаты в этом проекте.</p>','Загрузить',()=>applyData(p,demoData(p)));
+      }else safeReset(p,()=>applyData(p,demoData(p)));
+      break;
+    case 'import': if(agentJob?.projectId!==p.id)q('#csv-input').click();break;
+    case 'cluster': p.clusters=cluster(p.data.result,p.masks);selectedCluster=0;query='';save();render();break;
+    case 'cluster-select': selectedCluster=Number(index);query='';render();break;
+    case 'group-select': selectedGroup=Number(index);render();break;
+    case 'csv-download': download(files[index][0],'\uFEFF'+p.data.files[index].replace(/^\uFEFF/,''),'text/csv;charset=utf-8');break;
+    case 'generate':
+      if(p.clusters.length&&agentJob?.projectId!==p.id){
+        if(!c){p.campaign=draft(p);selectedGroup=0;save();}
+        changePage('campaign');
+      }
+      break;
+    case 'campaign-inputs': if(c&&['review','revision'].includes(c.status))editCampaignInputs(p);break;
+    case 'campaign-goal': if(c&&['review','revision'].includes(c.status))editGoal(p);break;
+    case 'campaign-clicks': if(c&&['review','revision'].includes(c.status))reviseDraft(p,{counter:'',goal:'',optimize:'clicks'});break;
+    case 'change-region':
+      if(agentJob?.projectId===p.id)break;
+      if(c?.status==='sent'){notify('Для смены региона после передачи создайте другой проект.');break;}
+      showDialog('Изменить регион проекта',
+        field('region','Регион сбора и показа',p.region,'maxlength="80" placeholder="Все регионы"')+
+        '<p class="muted smalltext">При смене региона нужно заново собрать или импортировать семантику. Кластеры и черновик этого проекта будут сброшены.</p>',
+        'Изменить регион',data=>{
+          const region=trim(data.get('region'));
+          if(region.toLowerCase()===p.region.toLowerCase())return;
+          p.region=region;p.regionCodes=[];p.agentError='';p.campaign=null;applyData(p,null);
+        });
+      break;
+    case 'edit': if(c&&['review','revision'].includes(c.status))editGroup(p);break;
+    case 'reject':
+      if(c?.status!=='review')break;
+      showDialog('Вернуть на доработку',
+        '<label class="field"><span>Замечания к кампании</span><textarea name="feedback" required maxlength="1000"></textarea></label>',
+        'Вернуть на доработку',data=>{
+          const feedback=trim(data.get('feedback'));
+          if(!feedback){notify('Укажите замечания к кампании.');return false;}
+          c.baseline=campaignBasis(c);c.status='revision';c.feedback=feedback;save();render();
+        });
+      break;
+    case 'resubmit': if(c?.status==='revision')reviseDraft(p,{});break;
+    case 'approve':
+      if(c?.status!=='review')break;
+      showDialog('Подтвердить кампанию?',
+        '<p class="muted">Подтверждена будет текущая версия черновика.</p>','Подтвердить',()=>{
+          c.status='approved';save();render();
+        });
+      break;
+    case 'send':
+      if(c?.status!=='approved')break;
+      showDialog('Передача в Яндекс Директ',
+        '<p class="muted">Будет выполнена демонстрационная передача. Данные не отправляются в рекламный аккаунт.</p>',
+        'Выполнить демопередачу',()=>{
+          c.status='sent';c.created='DEMO-'+Date.now().toString(36).toUpperCase();save();render();
+        });
+      break;
+    case 'package':
+      if(c?.status==='sent')download('klyuchnik-campaign.json',JSON.stringify({mode:'demo',operation:c.created,project:p.name,version:c.version,campaign:c.settings??buildBrief(p,defaultBrief(p)).settings,groups:c.groups.map(group=>({
+        name:group.name,region:p.region,keywords:group.keywords,negative:group.negative,
+        ads:[{format:'textGraphic',title:group.title,description:group.description,url:group.url}]
+      }))},null,2),'application/json');
+      break;
+    case 'close-dialog': q('#dialog').close();break;
+  }
+});
+q('#page').addEventListener('input',event=>{
+  if(event.target.id!=='query')return;
+  query=event.target.value;
+  const p=project();
+  q('#rows').innerHTML=rowsMarkup(p.clusters[selectedCluster]?.rows??p.data?.result??[]);
+});
+q('#csv-input').addEventListener('change',async event=>{
+  const selected=[...event.target.files],p=project();
+  event.target.value='';
+  if(!selected.length)return;
+  try{
+    const indexes=new Map(files.map(([name],index)=>[name,index]));
+    const contents=Array(5).fill(null);
+    const recognized=selected.filter(file=>indexes.has(file.name.toLowerCase()));
+    if(!recognized.some(file=>indexes.get(file.name.toLowerCase())===4))throw Error('Выберите 05_final_clean.csv. Остальные четыре файла можно добавить в той же загрузке.');
+    for(const file of recognized){
+      const index=indexes.get(file.name.toLowerCase());
+      if(contents[index]!==null)throw Error('Выбран дубликат файла '+file.name+'.');
+      const text=await file.text();
+      parseCsv(text);
+      contents[index]=text;
+    }
+    const result=finalRows(contents[4]);
+    if(project()!==p){notify('Проект изменился во время импорта. Повторите загрузку.');return;}
+    safeReset(p,()=>{
+      applyData(p,{kind:'import',result,files:contents});
+      notify('Загружено файлов: '+recognized.length+'. Итоговых фраз: '+result.length+'.');
+    });
+  }catch(error){notify(error.message);}
+});
+save();render();void connectAgent();
+</script>
+</body>
+</html>
