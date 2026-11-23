@@ -35,7 +35,7 @@
 <div class="side-project" id="side-project"></div>
 <div class="side-note">Поисковые кампании</div>
 </aside>
-<main><header class="topbar"><span id="breadcrumb"></span><button type="button" class="btn small" id="mode-badge" data-action="n8n-settings" disabled>Демо-режим</button></header><div class="page" id="page"></div></main>
+<main><header class="topbar"><span id="breadcrumb"></span><button type="button" class="btn small" id="mode-badge" data-action="nav-integrations">Подключения</button></header><div class="page" id="page"></div></main>
 </div>
 <dialog id="dialog"></dialog><div class="toast" id="toast" role="status" hidden></div>
 <input type="file" id="csv-input" accept=".csv,text/csv" multiple hidden>
@@ -62,7 +62,7 @@ const files = [
   ['04_irrelevant.csv','Нерелевантные фразы'],
   ['05_final_clean.csv','Итоговая семантика']
 ];
-const statusText={review:'На проверке',revision:'На доработке',approved:'Подтверждена',sent:'Передана в Директ · демо'};
+const statusText={review:'На проверке',revision:'На доработке',approved:'Подтверждена',sent:'Передана в Директ'};
 const storageKey='klyuchnik.workspace.v1';
 function projectRecord(fields){return {...fields,id:globalThis.crypto?.randomUUID?.()??String(Date.now()),data:null,clusters:[],campaign:null};}
 function workspaceDefaults(){
@@ -814,12 +814,11 @@ function head(title,subtitle,actions=''){return '<div class="page-head"><div><h1
 function shell(){
   const p=project();
   const button=q('#mode-badge');
-  button.disabled=!bridgeReady;
-  button.textContent=agentAvailable?'Настройки n8n':bridgeReady?'Подключить n8n':'Демо-режим';
+  button.textContent=agentAvailable||directConnection.available?'Настройки API':'Подключить API';
   q('#brand-symbol').innerHTML=icon('key');
-  q('#nav').innerHTML=[['projects','Проекты','folder'],['semantics','Семантика','search'],['campaign','Кампания','campaign'],['templates','Шаблоны','folder']].map(([key,label,symbol])=>'<button type="button" data-action="nav-'+key+'"'+(page===key||(page==='new'&&key==='projects')||(['template','group-template'].includes(page)&&key==='templates')||(page==='assign-groups'&&key==='campaign')?' aria-current="page"':'')+'>'+icon(symbol)+esc(label)+'</button>').join('');
+  q('#nav').innerHTML=[['projects','Проекты','folder'],['semantics','Семантика','search'],['campaign','Кампания','campaign'],['templates','Шаблоны','folder'],['integrations','Подключения','folder']].map(([key,label,symbol])=>'<button type="button" data-action="nav-'+key+'"'+(page===key||(page==='new'&&key==='projects')||(['template','group-template'].includes(page)&&key==='templates')||(page==='assign-groups'&&key==='campaign')?' aria-current="page"':'')+'>'+icon(symbol)+esc(label)+'</button>').join('');
   q('#side-project').innerHTML='Текущий проект<strong>'+esc(p.name)+'</strong>';
-  q('#breadcrumb').textContent=['projects','new','templates','template','group-template'].includes(page)?'Рабочее пространство':'Проекты / '+p.name;
+  q('#breadcrumb').textContent=['projects','new','templates','template','group-template','integrations'].includes(page)?'Рабочее пространство':'Проекты / '+p.name;
 }
 function projectsPage(){
   return head('Проекты','Подготовка поисковой рекламы для Яндекс Директа',button('Новый проект','new',{primary:true,icon:'plus'}))+
@@ -833,6 +832,7 @@ function projectForm(){
     '<label class="field"><span>Тематика или описание бизнеса</span><textarea name="niche" required maxlength="500"></textarea></label>'+
     '<label class="field"><span>Базовые маски</span><textarea name="masks" required placeholder="Одна фраза на строку" maxlength="1000"></textarea></label>'+
     '<div class="form-grid">'+field('region','Регион показа','','placeholder="Пустое поле — все регионы" maxlength="80"')+field('budget','Бюджет на месяц, ₽','','type="number" min="1" max="1000000000"')+'</div>'+
+    field('regionCodes','ID регионов для Wordstat и Директа','','maxlength="160" placeholder="Числа через запятую, можно заполнить при сборе"')+
     field('url','Посадочная страница','','type="url" placeholder="https://example.com/" maxlength="500"')+
     '<div class="actionbar">'+button('Отмена','nav-projects')+'<button class="btn primary" type="submit">Создать проект</button></div></form>';
 }
@@ -903,19 +903,24 @@ function campaignPage(p){
     (settings.counter||settings.goal?setting('Счётчик Метрики',settings.counter||'Уточнить')+setting('Цель Метрики',settings.goal||'Уточнить'):'')+
     (settings.counter&&review&&!hasTemplate?'<div>'+button('Перейти на клики','campaign-clicks',{small:true})+'</div>':'')+
     setting('Параметры URL',settings.utm||'Не заданы',true)+'</div></details></section>';
+  const verify=bridgeReady?button('Проверить для Директа','direct-verify'):'';
   const actions=c.status==='review'?
-    button('Вернуть на доработку','reject')+button('Подтвердить','approve',{primary:true,disabled:!!missing.length}):
+    verify+button('Вернуть на доработку','reject')+button('Подтвердить','approve',{primary:true,disabled:!!missing.length}):
     c.status==='revision'?button('Отправить на повторную проверку','resubmit',{primary:true}):
-    c.status==='approved'?button('Передать в Яндекс Директ','send',{primary:true}):button('Скачать пакет кампании','package');
-  const message=c.status==='sent'?'<div class="notice success"><strong>Демонстрационная передача завершена.</strong> Номер операции '+esc(c.created)+'.</div>':
+    c.status==='approved'?(c.directRequestId?
+      button('Проверить результат отправки','direct-refresh',{primary:true,disabled:pendingTransfer}):
+      (directConnection.available?button('Передать в Яндекс Директ','send',{primary:true}):
+        button('Подключить Директ','nav-integrations',{primary:true})+button('Демопередача','send'))):
+    button('Скачать пакет кампании','package');
+  const message=directResultMarkup(c)||(c.status==='sent'?'<div class="notice success"><strong>Демонстрационная передача завершена.</strong> Номер операции '+esc(c.created)+'.</div>':
     c.status==='revision'?'<div class="notice"><strong>Замечания к версии '+number(c.version)+'</strong><div>'+esc(c.feedback)+'</div></div>':
-    c.status==='approved'?'<div class="notice">Кампания подтверждена. Кнопка передачи создаст демонстрационный результат без обращения к Яндекс Директу.</div>':
-    c.feedback?'<div class="notice"><strong>Замечания к предыдущей версии</strong><div>'+esc(c.feedback)+'</div></div>':'';
+    c.status==='approved'?'<div class="notice">Кампания подтверждена. Проверьте параметры перед созданием кампании в Директе.</div>':
+    c.feedback?'<div class="notice"><strong>Замечания к предыдущей версии</strong><div>'+esc(c.feedback)+'</div></div>':'');
   const wishes=review?'<details class="card pad"'+((c.problems??[]).some(issue=>issue.startsWith('Не удалось'))?' open':'')+'><summary>Пожелания к черновику</summary>'+
     '<form class="form" id="wishes-form"><label class="field"><span>Что изменить</span><textarea name="instruction" rows="3" maxlength="4000" placeholder="Подсветку вынеси отдельно. В объявлениях не обещай скидку.">'+esc(brief.instruction)+'</textarea></label>'+
     '<p class="muted smalltext">Например: «Показы по будням с 9 до 19», «Исключи вакансии», «Упомяни бесплатный замер». Поддерживаются типовые формулировки.</p>'+
     '<div class="actionbar"><button class="btn primary" type="submit">Применить пожелания</button></div></form></details>':'';
-  return head('Проверка кампании',p.name,'<span class="badge '+(c.status==='approved'||c.status==='sent'?'green':c.status==='revision'?'amber':'')+'">'+statusText[c.status]+'</span>')+
+  return head('Проверка кампании',p.name,'<span class="badge '+(c.status==='approved'||c.status==='sent'?'green':c.status==='revision'?'amber':'')+'">'+(c.status==='sent'&&!c.directResult?'Передана в Директ · демо':statusText[c.status])+'</span>')+
     stage(p)+message+issues+settingsCard+templateSummary(c)+wishes+changes+
     '<div class="workspace"><section class="card"><div class="card-head"><h2>Группы объявлений</h2></div><div class="list">'+
     c.groups.map((item,i)=>'<button type="button" class="'+(item===group?'active':'')+'" aria-pressed="'+(item===group)+'" data-action="group-select" data-index="'+i+'">'+'<span>'+esc(item.name)+(item.groupTemplate?'<br><small class="muted">'+esc(item.groupTemplate.name)+'</small>':'')+'</span></button>').join('')+
@@ -926,13 +931,13 @@ function campaignPage(p){
     (group.groupTemplate?'<div><span class="badge">'+esc(group.groupTemplate.name)+'</span></div>':'')+
     groupTemplateSummary(group,p)+'<h3>Ключевые фразы</h3>'+phrases(groupPhrases(group,'keywords'))+
     '<h3>Минус-фразы группы</h3>'+phrases(groupPhrases(group,'negative'))+
-    '<div class="ad"><h3>Текстово-графическое объявление</h3><strong>'+esc(group.title)+'</strong><p>'+esc(group.description)+'</p>'+(href?'<a href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+esc(group.url)+'</a>':'<p class="muted smalltext">Посадочная страница не указана</p>')+
+    '<div class="ad"><h3>Комбинаторное объявление · текст</h3><strong>'+esc(group.title)+'</strong><p>'+esc(group.description)+'</p>'+(href?'<a href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+esc(group.url)+'</a>':'<p class="muted smalltext">Посадочная страница не указана</p>')+
     '</div></div></section></div><div class="actionbar">'+actions+'</div>';
 }
 function render(){
   const p=project();
   shell();
-  q('#page').innerHTML=page==='projects'?projectsPage():page==='new'?projectForm():page==='campaign'?campaignPage(p):page==='templates'?renderTemplateList():page==='template'?templateEditor():page==='group-template'?groupEditor():page==='assign-groups'?groupAssignmentPage(p):semanticsPage(p);
+  q('#page').innerHTML=page==='projects'?projectsPage():page==='new'?projectForm():page==='campaign'?campaignPage(p):page==='integrations'?integrationsPage():page==='templates'?renderTemplateList():page==='template'?templateEditor():page==='group-template'?groupEditor():page==='assign-groups'?groupAssignmentPage(p):semanticsPage(p);
 }
 function changePage(target){
   if(target!=='assign-groups')pendingGroupDraft=null;
@@ -943,6 +948,7 @@ function allowedUrl(value){
   try{const parsed=new URL(value);return ['http:','https:'].includes(parsed.protocol)?parsed.href:'';}catch{return '';}
 }
 function safeReset(p,apply){
+  if(p.campaign?.directRequestId&&p.campaign.status!=='sent'){notify('Сначала проверьте результат отправки в Директ.');return;}
   if(!p.campaign){apply();return;}
   if(p.campaign.status==='sent'){
     notify('Переданная кампания сохранена. Для нового сбора создайте другой проект.');
@@ -971,6 +977,114 @@ async function apiRequest(path,options){
   }
   return data;
 }
+let directConnection={available:false,login:''}, pendingTransfer=false;
+function integrationsPage(){
+  const local=!bridgeReady;
+  const summary=(name,value,caption,action,connected)=>
+    '<article class="card pad stack"><div class="row spread"><h2>'+esc(name)+'</h2><span class="badge '+(connected?'green':'')+'">'+
+    esc(value)+'</span></div><p class="muted">'+esc(caption)+'</p><div>'+button(connected?'Изменить подключение':'Подключить '+name,action,{primary:!connected,disabled:local})+'</div></article>';
+  return head('Подключения','Настройте сбор семантики и передачу кампаний')+
+    (local?'<div class="notice">Для подключения API запустите «Ключник» через приложение из меню «Пуск» или start.cmd.</div>':'')+
+    '<div class="templates-grid">'+summary('n8n',agentAvailable?'Подключён':'Не подключён',
+      agentAvailable?'Воркфлоу: '+n8nStatus.name:'Сбор семантики и проверка релевантности в локальном n8n.','n8n-settings',agentAvailable)+
+    summary('Яндекс Директ',directConnection.available?'Подключён':'Не подключён',
+      directConnection.available?(directConnection.login?'Клиент: '+directConnection.login:'Используется аккаунт владельца токена.'):
+        'Создание кампании, групп, ключевых фраз и объявлений после подтверждения.','direct-settings',directConnection.available)+'</div>';
+}
+function openDirectSettings(){
+  const dialog=q('#dialog');
+  dialog.innerHTML='<form class="form"><h2 id="dialog-title">Подключение Яндекс Директа</h2>'+
+    field('token','OAuth-токен Директа','','type="password" required autocomplete="off"')+
+    field('login','Логин клиента (если нужен)',directConnection.login,'maxlength="128" autocomplete="off"')+
+    '<p class="muted smalltext">Сначала проверим доступ чтением кампаний.</p>'+
+    '<p class="notice error" role="status" hidden></p>'+
+    '<div class="actionbar">'+button('Закрыть','close-dialog')+'<button type="submit" class="btn primary">Проверить и сохранить</button></div></form>';
+  dialog.setAttribute('aria-labelledby','dialog-title');
+  const form=dialog.querySelector('form');
+  form.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const submit=form.querySelector('button[type="submit"]'), note=form.querySelector('[role="status"]');
+    submit.disabled=true;submit.textContent='Проверяем доступ…';note.hidden=true;
+    try{
+      directConnection=await apiRequest('/api/direct/connect',jsonRequest(Object.fromEntries(new FormData(form))));
+      form.elements.token.value='';
+      if(dialog.open&&dialog.contains(form))dialog.close();
+      render();notify('Директ подключён.');
+    }catch(error){note.textContent=error.message;note.hidden=false;}
+    finally{submit.disabled=false;submit.textContent='Проверить и сохранить';}
+  });
+  dialog.showModal();
+}
+function jsonRequest(data){
+  return {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)};
+}
+function campaignPacket(p){
+  const c=p.campaign;
+  return {project:p.name,version:c.version,campaign:c.settings??buildBrief(p,defaultBrief(p)).settings,
+    groups:c.groups.map(group=>({name:group.name,region:effectiveGroupGeo(group,p).label,geography:effectiveGroupGeo(group,p),keywords:groupPhrases(group,'keywords'),
+      negative:groupPhrases(group,'negative'),
+      ...(group.groupTemplate?{groupTemplate:{id:group.groupTemplate.id,name:group.groupTemplate.name},settings:group.groupTemplate.settings}:{}),
+      ads:[{format:'responsive',title:group.title,description:group.description,url:group.url}]
+    }))};
+}
+function verifyCampaign(p){
+  const c=p.campaign;
+  void apiRequest('/api/direct/preview',jsonRequest(campaignPacket(p))).then(plan=>{
+    if(p.campaign!==c||project()!==p)return;
+    const summary=number(plan.groups)+' групп · '+number(plan.keywords)+' ключевых фраз · '+number(plan.ads)+' объявлений.';
+    showDialog('Проверка передачи в Директ',
+      '<p><strong>'+esc(plan.name)+'</strong></p><p>'+esc(summary)+'</p>'+
+      '<p class="muted smalltext">Дата начала в настройках: '+esc(plan.startDate)+'. Показы останутся выключенными до модерации и запуска в Директе.</p>'+
+      (c.status==='approved'?'<p class="notice">Будет создана кампания в подключённом аккаунте.</p>':'<p class="notice">Параметры прошли локальную проверку. Для передачи сначала подтвердите черновик.</p>'),
+      c.status==='approved'?'Создать в Яндекс Директе':'Закрыть',()=>{
+        if(c.status==='approved'&&!pendingTransfer)void submitDirect(p);
+      });
+  }).catch(error=>{
+    if(p.campaign!==c||project()!==p)return;
+    showDialog('Проверьте параметры кампании','<p class="notice error">'+esc(error.message)+'</p>','Закрыть',()=>{});
+  });
+}
+function applyDirectResult(p,result){
+  const c=p.campaign;
+  c.directResult=result;
+  if(result.status==='done'){c.status='sent';c.created=String(result.campaignId);}
+  save();render();
+}
+async function submitDirect(p){
+  const c=p.campaign;
+  c.directRequestId??=crypto.randomUUID();
+  pendingTransfer=true;
+  save();render();
+  try{
+    const result=await apiRequest('/api/direct/transfer',jsonRequest({id:c.directRequestId,draft:campaignPacket(p)}));
+    applyDirectResult(p,result);
+  }catch(error){
+    notify(error.message);
+    await refreshDirectResult(p);
+  }finally{pendingTransfer=false;render();}
+}
+async function refreshDirectResult(p){
+  const c=p.campaign;
+  if(!c?.directRequestId)return;
+  try{
+    const result=await apiRequest('/api/direct/transfer/'+encodeURIComponent(c.directRequestId));
+    if(p.campaign!==c)return;
+    if(result.status==='missing'){
+      delete c.directRequestId;delete c.directResult;save();render();
+    }else applyDirectResult(p,result);
+  }catch(error){notify(error.message);}
+}
+function directResultMarkup(c){
+  if(c.directResult?.status==='done')return '<div class="notice success"><strong>Кампания создана в Яндекс Директе</strong>'+
+    '<p>ID кампании '+esc(c.directResult.campaignId)+' · '+number(c.directResult.addedGroups)+' групп · '+number(c.directResult.addedAds)+' объявлений</p>'+
+    '<p class="smalltext">Модерация и запуск доступны в рекламном кабинете.</p></div>';
+  if(c.directResult?.status==='error')return '<div class="notice error"><strong>Передача остановилась · '+esc(c.directResult.step)+'</strong>'+
+    '<p>'+esc(c.directResult.message)+'</p>'+(c.directResult.campaignId?'<p>ID уже созданной кампании '+esc(c.directResult.campaignId)+'</p>':'')+
+    '<p>Проверьте состояние кампании в Директе перед новой отправкой.</p></div>';
+  if(c.directRequestId)return '<div class="notice" role="status">'+(pendingTransfer?'Передаём кампанию в Директ…':'Проверьте результат отправки.')+'</div>';
+  return '';
+}
+
 function openN8nSettings(){
   const dialog=q('#dialog');
   dialog.innerHTML='<form class="form"><h2 id="dialog-title">Подключение n8n</h2>'+
@@ -1011,6 +1125,7 @@ function storeAgentJob(job){
   try{if(job)localStorage.setItem(pendingKey,JSON.stringify(job));else localStorage.removeItem(pendingKey);}catch{}
 }
 function collectWordstat(p){
+  if(p.campaign?.directRequestId&&p.campaign.status!=='sent'){notify('Сначала проверьте результат отправки в Директ.');return;}
   if(p.campaign?.status==='sent'){notify('Для нового сбора создайте другой проект.');return;}
   const regionField=p.region?field('codes','Коды регионов Wordstat',p.regionCodes?.join(', ')||'','required placeholder="Числа через запятую"'):'';
   showDialog('Собрать семантику в Wordstat',
@@ -1059,7 +1174,9 @@ async function connectAgent(){
     n8nStatus=await apiRequest('/api/semantics/status');
     bridgeReady=true;agentAvailable=n8nStatus.available===true;
   }catch{return;}
+  try{directConnection=await apiRequest('/api/direct/status');}catch{}
   render();
+  if(project().campaign?.directRequestId&&!project().campaign.directResult)void refreshDirectResult(project());
   if(!agentAvailable)return;
   try{
     const run=JSON.parse(localStorage.getItem(pendingKey));
@@ -1156,7 +1273,10 @@ document.addEventListener('submit',event=>{
   const masks=listInput(data.get('masks'),50);
   if(!name||!niche||!masks.length){notify('Заполните название, тематику и базовые маски.');return;}
   if(url&&!allowedUrl(url)){notify('Укажите ссылку с http:// или https://.');return;}
-  const p=projectRecord({name,niche,masks,region:trim(data.get('region')),budget:Number(data.get('budget')),url});
+  const regionCodes=listValues(data.get('regionCodes'));
+  if(regionCodes.some(code=>!/^\d{1,12}$/.test(code))){notify('Введите числовые ID регионов.');return;}
+  if(regionCodes.length&&!trim(data.get('region'))){notify('Укажите название региона для введённых ID.');return;}
+  const p=projectRecord({name,niche,masks,region:trim(data.get('region')),regionCodes,budget:Number(data.get('budget')),url});
   state.projects.push(p);state.active=p.id;selectedCluster=0;selectedGroup=0;save();changePage('semantics');
 });
 document.addEventListener('click',event=>{
@@ -1194,6 +1314,9 @@ document.addEventListener('click',event=>{
     case 'new': changePage('new');break;
     case 'open': state.active=id;selectedCluster=0;selectedGroup=0;save();changePage('semantics');break;
     case 'n8n-settings': if(bridgeReady&&!agentJob)openN8nSettings();break;
+    case 'direct-settings': if(bridgeReady&&!pendingTransfer)openDirectSettings();break;
+    case 'direct-verify': if(c&&bridgeReady)verifyCampaign(p);break;
+    case 'direct-refresh': if(c?.directRequestId&&!pendingTransfer)void refreshDirectResult(p);break;
     case 'collect':
       if(agentJob)break;
       if(agentAvailable){collectWordstat(p);break;}
@@ -1216,14 +1339,18 @@ document.addEventListener('click',event=>{
     case 'campaign-clicks': if(c&&['review','revision'].includes(c.status))reviseDraft(p,{counter:'',goal:'',optimize:'clicks'});break;
     case 'change-region':
       if(agentJob?.projectId===p.id)break;
+      if(c?.directRequestId&&c.status!=='sent'){notify('Сначала проверьте результат отправки в Директ.');break;}
       if(c?.status==='sent'){notify('Для смены региона после передачи создайте другой проект.');break;}
       showDialog('Изменить регион проекта',
         field('region','Регион сбора и показа',p.region,'maxlength="80" placeholder="Все регионы"')+
+        field('regionCodes','ID регионов для Wordstat и Директа',(p.regionCodes??[]).join(', '),'maxlength="160"')+
         '<p class="muted smalltext">При смене региона нужно заново собрать или импортировать семантику. Кластеры и черновик этого проекта будут сброшены.</p>',
         'Изменить регион',data=>{
           const region=trim(data.get('region'));
-          if(region.toLowerCase()===p.region.toLowerCase())return;
-          p.region=region;p.regionCodes=[];p.agentError='';p.campaign=null;applyData(p,null);
+          const codes=listValues(data.get('regionCodes'));
+          if(codes.some(code=>!/^\d{1,12}$/.test(code))||(codes.length&&!region)){notify('Проверьте название региона и его числовые ID.');return false;}
+          if(region.toLowerCase()===p.region.toLowerCase()&&JSON.stringify(codes)===JSON.stringify(p.regionCodes??[]))return;
+          p.region=region;p.regionCodes=codes;p.agentError='';p.campaign=null;applyData(p,null);
         });
       break;
     case 'edit': if(c&&['review','revision'].includes(c.status))editGroup(p);break;
@@ -1246,7 +1373,8 @@ document.addEventListener('click',event=>{
         });
       break;
     case 'send':
-      if(c?.status!=='approved')break;
+      if(c?.status!=='approved'||pendingTransfer||c.directRequestId)break;
+      if(directConnection.available){verifyCampaign(p);break;}
       showDialog('Передача в Яндекс Директ',
         '<p class="muted">Будет выполнена демонстрационная передача. Данные не отправляются в рекламный аккаунт.</p>',
         'Выполнить демопередачу',()=>{
@@ -1254,12 +1382,9 @@ document.addEventListener('click',event=>{
         });
       break;
     case 'package':
-      if(c?.status==='sent')download('klyuchnik-campaign.json',JSON.stringify({mode:'demo',operation:c.created,project:p.name,version:c.version,campaign:c.settings??buildBrief(p,defaultBrief(p)).settings,groups:c.groups.map(group=>({
-        name:group.name,region:group.groupTemplate?effectiveGroupGeo(group,p).label:p.region,
-        geography:effectiveGroupGeo(group,p),keywords:groupPhrases(group,'keywords'),negative:groupPhrases(group,'negative'),
-        ...(group.groupTemplate?{groupTemplate:{id:group.groupTemplate.id,name:group.groupTemplate.name},settings:group.groupTemplate.settings}:{}),
-        ads:[{format:'textGraphic',title:group.title,description:group.description,url:group.url}]
-      }))},null,2),'application/json');
+      if(c?.status==='sent')download('klyuchnik-campaign.json',JSON.stringify({
+        mode:c.directResult?.status==='done'?'direct':'demo',operation:c.created,...campaignPacket(p)
+      },null,2),'application/json');
       break;
     case 'close-dialog': q('#dialog').close();break;
   }

@@ -1,8 +1,10 @@
 import http from 'node:http';
+import {spawn} from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { connectN8n, loadConnection } from './n8n-connect.mjs';
 import { listMetrikaGoals } from './metrika.mjs';
+import {connectDirect,directStatus,previewDirect,transferDirect,directTransferStatus} from './direct.mjs';
 
 const host = '127.0.0.1';
 const port = Number(process.env.KLYUCHNIK_PORT || 8787);
@@ -20,12 +22,12 @@ function json(res, status, data) {
   res.end(JSON.stringify(data));
 }
 
-async function bodyOf(req) {
+async function bodyOf(req, limit=32000) {
   const buffers = [];
   let size = 0;
   for await (const chunk of req) {
     size += chunk.length;
-    if (size > 32000) throw new Error('Слишком много данных для запроса.');
+    if (size > limit) throw new Error('Слишком много данных для запроса.');
     buffers.push(chunk);
   }
   try{return JSON.parse(Buffer.concat(buffers).toString('utf8'));}catch{throw Error('Ожидался JSON.');}
@@ -87,9 +89,29 @@ const server = http.createServer(async (req,res)=>{
   if (req.method==='GET' && path==='/api/semantics/status') {
     json(res,200,{available:Boolean(connection),name:connection?.name??'',url:connection?.base??''});return;
   }
-  if(req.method==='POST'&&(path==='/api/semantics/jobs'||path==='/api/semantics/connect'||path==='/api/metrika/goals')&&
+  if(req.method==='POST'&&(path==='/api/semantics/jobs'||path==='/api/semantics/connect'||path==='/api/metrika/goals'||path.startsWith('/api/direct/'))&&
       (req.headers.origin!==origin||!/^application\/json(?:;|$)/i.test(req.headers['content-type']||''))){
     json(res,403,{message:'Откройте настройки в окне «Ключника».'});return;
+  }
+  if(req.method==='GET'&&path==='/api/direct/status'){
+    try{json(res,200,await directStatus());}catch{json(res,500,{message:'Не удалось прочитать подключение Директа.'});}
+    return;
+  }
+  if(req.method==='POST'&&path==='/api/direct/connect'){
+    try{json(res,200,await connectDirect(await bodyOf(req)));}catch(error){json(res,400,{message:error.message});}
+    return;
+  }
+  if(req.method==='POST'&&(path==='/api/direct/preview'||path==='/api/direct/transfer')){
+    try{
+      const data=await bodyOf(req,4*1024*1024);
+      if(path.endsWith('/preview'))json(res,200,previewDirect(data));
+      else json(res,200,await transferDirect(data.id,data.draft));
+    }catch(error){json(res,400,{message:error.message});}
+    return;
+  }
+  if(req.method==='GET'&&/^\/api\/direct\/transfer\/[\da-f-]{36}$/i.test(path)){
+    try{json(res,200,await directTransferStatus(path.split('/').pop()));}catch(error){json(res,400,{message:error.message});}
+    return;
   }
   if(req.method==='POST'&&path==='/api/metrika/goals'){
     try{json(res,200,{goals:await listMetrikaGoals(await bodyOf(req))});}
@@ -121,4 +143,11 @@ const server = http.createServer(async (req,res)=>{
   }
   json(res,404,{message:'Страница не найдена.'});
 });
-server.listen(port,host,()=>console.log('Ключник: '+origin));
+server.listen(port,host,()=>{
+  console.log('Ключник: '+origin);
+  if(process.platform==='win32'&&process.argv.includes('--open')){
+    const browser=spawn('cmd.exe',['/d','/c','start','',origin],{stdio:'ignore',windowsHide:true,detached:true});
+    browser.on('error',()=>{});
+    browser.unref();
+  }
+});

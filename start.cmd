@@ -1,11 +1,14 @@
 @echo off
 cd /d "%~dp0"
-where node >nul 2>nul
-if errorlevel 1 (
-  echo Install Node.js 22 or later, then run start.cmd again.
-  pause
-  exit /b 1
+if exist "%~dp0runtime\node.exe" (
+  "%~dp0runtime\node.exe" "%~dp0klyuchnik-server.mjs" --open
+) else (
+  where node >nul 2>nul
+  if errorlevel 1 (
+    echo Use the Windows installer or install Node.js 22 or later.
+    pause
+    exit /b 1
+  )
+  node "%~dp0klyuchnik-server.mjs" --open
 )
-start "" "http://127.0.0.1:8787"
-node klyuchnik-server.mjs
-pause
+if errorlevel 1 pause
