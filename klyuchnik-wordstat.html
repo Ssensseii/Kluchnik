@@ -68,18 +68,17 @@ function projectRecord(fields){return {...fields,id:globalThis.crypto?.randomUUI
 function workspaceDefaults(){
   const p=projectRecord({name:'Натяжные потолки',niche:'Замер и монтаж натяжных потолков',masks:['монтаж потолков','потолки с подсветкой','потолки для кухни'],region:'Казань',budget:30000,url:'https://example.com/potolki'});
   p.data=demoData(p);
-  p.clusters=cluster(p.data.result,p.masks);
+  p.clusters=clusterProject(p);
   return {projects:[p],active:p.id};
 }
 function load(){
   try{const saved=JSON.parse(localStorage.getItem(storageKey));if(Array.isArray(saved?.projects)&&saved.projects.length)return saved;}catch{}
   return workspaceDefaults();
 }
-const state=load();
 let agentAvailable=false;
 let bridgeReady=false;
 let n8nStatus={};
-let agentJob=null;
+let agentJob=null, campaignJob=null;
 const pendingKey='klyuchnik.wordstat.job';
 
 let page='semantics',selectedCluster=0,selectedGroup=0,query='',toastTimer;
@@ -96,18 +95,124 @@ function notify(text){
 function button(label,action,options={}){
   return '<button class="btn '+(options.primary?'primary ':'')+(options.small?'small':'')+'" type="button" data-action="'+action+'"'+(options.disabled?' disabled':'')+'>'+(options.icon?icon(options.icon):'')+esc(label)+'</button>';
 }
+const kazanCeilingTopics = [
+  ['Монтаж натяжных потолков', 620, [
+    'натяжные потолки','монтаж натяжных потолков','установка натяжного потолка','заказать натяжной потолок','мастер по натяжным потолкам',
+    'фирма натяжных потолков','натяжной потолок с установкой','натяжные потолки под ключ','монтаж потолка из пвх','натяжные потолки от производителя'
+  ], ['',' казань',' цена',' недорого',' с гарантией',' с выездом замерщика',' с монтажом в выходные',' по акции']],
+  ['Цена и расчёт стоимости', 480, [
+    'стоимость натяжного потолка','цена натяжных потолков за квадратный метр','расчет стоимости натяжного потолка','калькулятор натяжных потолков','цена установки натяжного потолка',
+    'сколько стоит натяжной потолок','прайс на натяжные потолки','цена натяжного потолка с монтажом','расчет натяжного потолка по площади','стоимость натяжных потолков под ключ'
+  ], ['',' казань',' с материалом',' для квартиры',' для частного дома',' с учетом светильников',' в новостройке',' без освещения']],
+  ['Потолки с подсветкой', 420, [
+    'натяжной потолок с подсветкой','потолок с подсветкой по периметру','натяжной потолок со световыми линиями','парящий натяжной потолок','контурный натяжной потолок',
+    'потолок со скрытой подсветкой','натяжной потолок с led лентой','натяжной потолок с трековым освещением','потолок с точечными светильниками','натяжной потолок с подсветкой ниши'
+  ], ['',' казань',' цена',' заказать',' с установкой',' под ключ',' для квартиры',' для частного дома']],
+  ['Потолки для кухни', 355, [
+    'натяжной потолок на кухню','матовый натяжной потолок на кухню','потолок с подсветкой на кухню','натяжной потолок для кухни гостиной','натяжной потолок на маленькую кухню',
+    'натяжной потолок над кухонным гарнитуром','белый натяжной потолок на кухню','глянцевый натяжной потолок на кухню','натяжной потолок на кухню с вытяжкой','натяжной потолок в кухне с газовой плитой'
+  ], ['',' казань',' цена',' заказать',' с монтажом',' с точечным освещением',' с гарантией']],
+  ['Потолки в ванной', 305, [
+    'натяжной потолок в ванную','натяжной потолок в санузел','натяжной потолок в душевую','пвх потолок для ванной','влагостойкий натяжной потолок для ванной',
+    'матовый натяжной потолок в ванную','глянцевый натяжной потолок в ванную','потолок с подсветкой в ванную','натяжной потолок в маленькую ванную','натяжной потолок в совмещенный санузел'
+  ], ['',' казань',' цена',' заказать',' с установкой',' с вентиляцией']],
+  ['Потолки в жилых комнатах', 285, [
+    'натяжной потолок в спальню','натяжной потолок в зал','натяжной потолок в детскую','натяжной потолок в гостиную','натяжной потолок в коридор',
+    'натяжной потолок в прихожую','натяжной потолок в кабинет','натяжной потолок для студии','натяжной потолок в комнату без люстры','натяжной потолок для комнаты с низкими стенами'
+  ], ['',' казань',' цена',' заказать',' с монтажом',' с подсветкой',' по акции']],
+  ['Матовые потолки', 270, [
+    'матовые натяжные потолки','белый матовый натяжной потолок','серый матовый натяжной потолок','матовый натяжной потолок из пвх','бесшовный матовый натяжной потолок',
+    'матовый натяжной потолок под штукатурку','матовое полотно для натяжного потолка','широкий матовый натяжной потолок','матовый натяжной потолок без блеска','светлый матовый натяжной потолок'
+  ], ['',' казань',' цена',' заказать',' с установкой',' под ключ']],
+  ['Глянцевые и сатиновые потолки', 235, [
+    'глянцевый натяжной потолок','белый глянцевый натяжной потолок','черный глянцевый натяжной потолок','глянцевое полотно для натяжного потолка','бесшовный глянцевый натяжной потолок',
+    'сатиновые натяжные потолки','белый сатиновый натяжной потолок','сатиновое полотно для потолка','сатиновый натяжной потолок с подсветкой','глянцевый натяжной потолок с люстрой'
+  ], ['',' казань',' цена',' заказать',' с установкой',' под ключ']],
+  ['Тканевые потолки', 210, [
+    'тканевые натяжные потолки','белый тканевый натяжной потолок','бесшовный тканевый натяжной потолок','тканевый натяжной потолок clipso','натяжной потолок descor',
+    'натяжной потолок из ткани','тканевый натяжной потолок без нагрева','тканевое полотно для натяжного потолка','тканевый потолок для загородного дома','тканевый потолок для неотапливаемого помещения'
+  ], ['',' казань',' цена',' заказать',' с установкой',' под ключ']],
+  ['Теневые потолки и карнизы', 190, [
+    'теневой натяжной потолок','натяжной потолок с теневым профилем','натяжной потолок без плинтуса','натяжной потолок eurokraab','натяжной потолок со скрытым карнизом',
+    'ниша под шторы в натяжном потолке','скрытый карниз с подсветкой в потолке','натяжной потолок со встроенной гардиной','натяжной потолок с нишей у окна','натяжной потолок с карнизом во всю стену'
+  ], ['',' казань',' цена',' заказать',' с монтажом',' под ключ']],
+  ['Ремонт и замена полотна', 170, [
+    'ремонт натяжного потолка','замена полотна натяжного потолка','слив воды с натяжного потолка','ремонт пореза натяжного потолка','ремонт натяжного потолка после затопления',
+    'демонтаж и установка натяжного потолка','натяжной потолок выскочил из профиля ремонт','просел натяжной потолок вызвать мастера','замена светильников в натяжном потолке','подтянуть провисший натяжной потолок'
+  ], ['',' казань',' цена',' с выездом мастера',' срочно',' с гарантией']],
+  ['Натяжные потолки по районам Казани', 150, [
+    'ново савиновский район','советский район','приволжский район','вахитовский район','кировский район',
+    'московский район','авиастроительный район','горки','азино','салават купере'
+  ], ['натяжные потолки','монтаж натяжных потолков','натяжной потолок под ключ','установка натяжных потолков','заказать натяжной потолок','натяжной потолок с подсветкой']]
+];
+
+function kazanCeilingDemo(){
+  const localTopic=kazanCeilingTopics.length-1;
+  const clusterSizes=[80,75,72,65,57,62,55,49,47,51,50,57];
+  const frequency=(head,rank,variant)=>{
+    const tail=[1,.72,.44,.28,.16,.09,.055,.035][variant];
+    return Math.max(1,Math.round(head*tail/(1+rank*.58)+((rank*27+variant*13)%11)-5));
+  };
+  const demoClusters=kazanCeilingTopics.map(([name,head,bases,variants],topic)=>({
+    name,
+    rows:bases.flatMap((base,rank)=>variants.map((variant,index)=>({
+      phrase:topic===localTopic?variant+' '+base+' казань':base+variant,
+      freq:frequency(head,rank,index)
+    }))).sort((a,b)=>b.freq-a.freq||a.phrase.localeCompare(b.phrase,'ru')).slice(0,clusterSizes[topic])
+  }));
+  const result=demoClusters.flatMap(cluster=>cluster.rows).sort((a,b)=>b.freq-a.freq||a.phrase.localeCompare(b.phrase,'ru'));
+  const longTail=[
+    'в мансарде с ломаной крышей и двумя окнами','в прихожей с пятью углами и открытой трубой',
+    'над островом в кухне с двумя вентиляционными решетками','в ванной с полукруглой перегородкой и встроенным шкафом',
+    'в коридоре с деревянными балками и двумя арками','в детской с разными уровнями и овальным светильником',
+    'в комнате с эркером и потолочным проектором','в узкой гардеробной с колонной и скрытыми дверями',
+    'в спальне с нишей под кровать и скошенной стеной','в гостиной с тремя колоннами и открытым воздуховодом'
+  ];
+  const empty=kazanCeilingTopics.flatMap(([, ,bases],topic)=>longTail.map((tail,index)=>({
+    phrase:(topic===localTopic?'натяжной потолок '+bases[index]:bases[0])+' '+tail+' казань',
+    freq:0
+  })));
+  const offTopic=[
+    [135,['вакансии','работа','подработка','резюме','обучение','курсы','стажировка','зарплата','должностная инструкция','обязанности'],
+      ['монтажник натяжных потолков','замерщик натяжных потолков']],
+    [180,['своими руками','как сделать самому','пошаговая инструкция','видео для начинающих','схема монтажа','монтаж без мастера','форум самоделкиных','урок монтажа','как натянуть самостоятельно','какие инструменты нужны'],
+      ['натяжной потолок из пвх','тканевый натяжной потолок']],
+    [115,['купить оптом','цена за рулон','поставщики оптом','оптовый склад','для производства','станок для раскроя','оборудование для сварки','прайс для дилеров','поставки из китая','производственная линия'],
+      ['пленка пвх для натяжных потолков','ткань для натяжных потолков']],
+    [160,['в москве','в самаре','в уфе','в перми','в омске','в тюмени','в новосибирске','в волгограде','в челябинске','в санкт петербурге'],
+      ['заказать натяжные потолки','монтаж натяжных потолков']],
+    [90,['скачать','чертеж dwg','модель для sketchup','модель для blender','текстура бесшовная','реферат','презентация скачать','картинка png','текстура для 3d max','объект для archicad'],
+      ['натяжной потолок','натяжной потолок со световыми линиями']],
+    [100,['купить','для установки','на авито','в аренду','б у','запчасти','ремонт оборудования','как выбрать','инструкция','прокат'],
+      ['тепловая пушка для натяжных потолков','профессиональный лазер для монтажа потолков']],
+    [88,['купить','монтаж','с установкой','цена за квадратный метр','под ключ','белый','для офиса','для магазина','для гаража','для склада'],
+      ['реечный потолок','потолок армстронг']],
+    [76,['смысл выражения','определение','что это простыми словами','википедия','пример расчета','как измерить','значение термина','таблица','формула','пример задачи'],
+      ['потолок цен','потолок зарплаты']]
+  ];
+  const irrelevant=offTopic.flatMap(([head,variants,subjects])=>subjects.flatMap((subject,rank)=>variants.map((variant,index)=>({
+    phrase:subject+' '+variant,
+    freq:frequency(head,index,rank)
+  }))));
+  const sortByFrequency=(a,b)=>b.freq-a.freq||a.phrase.localeCompare(b.phrase,'ru');
+  const positive=[...result,...irrelevant].sort(sortByFrequency);
+  const files=[[...positive,...empty],empty,positive,irrelevant.sort(sortByFrequency),result].map(csvRows);
+  return {kind:'demo',sample:'kazan-ceilings-v2',result,files,demoClusters};
+}
+function isKazanCeilingDemo(p){
+  return p.region==='Казань'&&p.masks.join('|')==='монтаж потолков|потолки с подсветкой|потолки для кухни';
+}
 function demoData(p){
-  const example=p.masks.join('|')==='монтаж потолков|потолки с подсветкой|потолки для кухни';
-  const phrases=example ? [
-    ['монтаж натяжных потолков',320],['установка натяжного потолка',180],['монтаж потолков цена',140],
-    ['натяжные потолки с подсветкой',210],['потолок с подсветкой цена',96],
-    ['натяжные потолки для кухни',170],['потолки для кухни монтаж',65]
-  ] : p.masks.flatMap((mask,index)=>[[mask,220-index*12],[mask+' цена',120-index*5],[mask+' заказать',65-index*2]]);
+  if(isKazanCeilingDemo(p))return kazanCeilingDemo();
+  const phrases=p.masks.flatMap((mask,index)=>[[mask,220-index*12],[mask+' цена',120-index*5],[mask+' заказать',65-index*2]]);
   const result=phrases.map(([phrase,freq])=>({phrase,freq}));
   const empty=[{phrase:p.masks[0]+' редко',freq:0}];
   const irrelevant=[{phrase:p.masks[0]+' вакансии',freq:52},{phrase:p.masks[0]+' своими руками',freq:70}];
   const noEmpty=[...result,...irrelevant];
   return {kind:'demo',result,files:[[...noEmpty,...empty],empty,noEmpty,irrelevant,result].map(csvRows)};
+}
+function clusterProject(p){
+  return p.data.demoClusters??cluster(p.data.result,p.masks);
 }
 function csvRows(rows){
   const cell=value=>'"'+String(value).replaceAll('"','""')+'"';
@@ -375,6 +480,49 @@ async function refreshTemplateGoals(){
   }catch(error){status.textContent=error.message;}
   finally{button.disabled=false;}
 }
+function saveCampaignDraft(p,c){
+  p.campaign=c;
+  save();
+  if(project()===p&&['semantics','assign-groups','campaign'].includes(page)){
+    selectedGroup=0;changePage('campaign');
+  }else render();
+}
+async function prepareCampaignDraft(p,c){
+  if(!n8nStatus.campaignAvailable){saveCampaignDraft(p,c);return;}
+  if(campaignJob)return;
+  const clusters=p.clusters;
+  const data=p.data;
+  const run={projectId:p.id};
+  campaignJob=run;
+  if(page==='assign-groups')changePage('semantics');else render();
+  try{
+    const reply=await apiRequest('/api/campaign/prepare',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        project:{name:p.name,niche:p.niche,region:p.region,regionIds:p.regionCodes??[],site:c.settings.site},
+        campaignTemplate:c.brief.campaignTemplate,
+        settings:c.settings,
+        groups:c.groups.map((group,index)=>({
+          id:String(index),name:group.name,keywords:groupPhrases(group,'keywords'),
+          negative:groupPhrases(group,'negative'),groupTemplate:group.groupTemplate,url:group.url
+        }))
+      })
+    });
+    if(p.campaign||p.data!==data||p.clusters!==clusters)throw Error('Семантика проекта изменилась. Подготовьте кампанию заново.');
+    const byId=new Map(reply.groups.map(group=>[group.id,group]));
+    c.groups.forEach((group,index)=>{
+      const result=byId.get(String(index));
+      group.title=result.title;
+      group.description=result.description;
+      group.textBasis={title:result.title,description:result.description};
+      group.negative=result.negative;
+    });
+    c.workflowName=n8nStatus.campaignName;
+    saveCampaignDraft(p,c);
+    notify('Агент n8n подготовил черновик кампании.');
+  }catch(error){notify(error.message);}
+  finally{campaignJob=null;render();}
+}
 function applyTemplate(p,item){
   const snapshot=item?structuredClone(item):null;
   const brief={...campaignBrief(p,p.campaign),campaignTemplate:snapshot};
@@ -384,8 +532,8 @@ function applyTemplate(p,item){
     changePage('assign-groups');
     return;
   }
-  p.campaign=generated;
-  selectedGroup=0;save();changePage('campaign');
+  if(p.campaign)saveCampaignDraft(p,generated);
+  else void prepareCampaignDraft(p,generated);
 }
 function chooseTemplate(p){
   if(!templates().length){if(p.campaign){notify('Создайте первый шаблон кампании во вкладке «Шаблоны».');return;}applyTemplate(p,null);return;}
@@ -798,7 +946,7 @@ function draft(p,old,brief=campaignBrief(p,old)){
       group.description=group.description.replace(literal,'').replace(/\s+/g,' ').replace(/^[\s.,;:!?]+|[\s,;:]+$/g,'').trim();
     }
   }
-  const result={status:'review',feedback:old?.feedback??'',version:(old?.version??0)+1,created:null,groups,settings,brief,problems,needsGoal};
+  const result={status:'review',workflowName:old?.workflowName,feedback:old?.feedback??'',version:(old?.version??0)+1,created:null,groups,settings,brief,problems,needsGoal};
   result.changes=changeSummary(old?.baseline??old,result);
   return result;
 }
@@ -849,18 +997,21 @@ function rowsMarkup(rows){
 }
 function semanticsPage(p){
   const data=p.data;
-  const collecting=agentJob?.projectId===p.id;
-  const agentStatus=collecting?'<div class="notice" role="status">n8n собирает фразы и проверяет релевантность. Результат появится здесь после завершения.</div>':
+  const preparing=campaignJob?.projectId===p.id;
+  const collecting=agentJob?.projectId===p.id||preparing;
+  const agentStatus=preparing?'<div class="notice" role="status">Агент n8n готовит объявления и минус-фразы. Черновик откроется после завершения.</div>':collecting?'<div class="notice" role="status">n8n собирает фразы и проверяет релевантность. Результат появится здесь после завершения.</div>':
     p.agentError?'<div class="notice error" role="status">'+esc(p.agentError)+'</div>':
     data?.warning?'<div class="notice" role="status">'+esc(data.warning)+'</div>':'';
   const imported=data?.kind==='import'||data?.kind==='wordstat';
+  const sampleCaption=data?.sample?'<p class="muted smalltext">Демо для Казани · частотность условная</p>':'';
+  const upgradeDemo=data?.kind==='demo'&&!data.sample&&isKazanCeilingDemo(p)?button('Обновить демоданные','upgrade-demo',{disabled:collecting}):'';
   const current=p.clusters[selectedCluster];
   const title=current?.name??'Очищенные фразы';
   const rows=current?.rows??data?.result??[];
   const filters=p.clusters.length?
     '<section class="card"><div class="card-head"><h2>Кластеры</h2></div><div class="list">'+p.clusters.map((group,i)=>'<button type="button" data-action="cluster-select" data-index="'+i+'"'+(i===selectedCluster?' class="active" aria-pressed="true"':' aria-pressed="false"')+'>'+esc(group.name)+'<span class="count">'+number(group.rows.length)+'</span></button>').join('')+'</div></section>':'<section class="card pad stack"><h2>Кластеры</h2><p class="muted">Очищенные фразы можно сгруппировать по базовым маскам проекта.</p></section>';
-  return head('Семантика',p.name,button('Изменить регион','change-region',{disabled:collecting})+button('Импорт CSV','import',{icon:'upload',disabled:collecting})+button(collecting?'Сбор выполняется':'Собрать семантику','collect',{primary:true,disabled:!!agentJob}))+
-    stage(p)+(bridgeReady&&agentAvailable?'<p class="muted smalltext">Агент n8n · '+esc(n8nStatus.name)+'</p>':'')+agentStatus+(data?'<div class="row spread"><span class="badge '+(imported?'green':'')+'">'+(data.kind==='wordstat'?'Сбор из Wordstat':imported?'Результаты из n8n':'Демонстрационные данные')+'</span><div class="row">'+button('Кластеризовать','cluster',{disabled:collecting||!data.result.length})+button(p.campaign?'Открыть кампанию':'Подготовить кампанию','generate',{primary:true,disabled:collecting||!p.clusters.length})+'</div></div>'+
+  return head('Семантика',p.name,button('Изменить регион','change-region',{disabled:collecting})+button('Импорт CSV','import',{icon:'upload',disabled:collecting})+button(agentJob?.projectId===p.id?'Сбор выполняется':'Собрать семантику','collect',{primary:true,disabled:!!agentJob||!!campaignJob}))+
+    stage(p)+(bridgeReady&&agentAvailable?'<p class="muted smalltext">Агент n8n · '+esc(n8nStatus.name)+'</p>':'')+agentStatus+(data?sampleCaption+'<div class="row spread"><span class="badge '+(imported?'green':'')+'">'+(data.kind==='wordstat'?'Сбор из Wordstat':imported?'Результаты из n8n':'Демонстрационные данные')+'</span><div class="row">'+upgradeDemo+button('Кластеризовать','cluster',{disabled:collecting||!data.result.length})+button(p.campaign?'Открыть кампанию':'Подготовить кампанию','generate',{primary:true,disabled:collecting||!!campaignJob||!p.clusters.length})+'</div></div>'+
     stats(p)+'<div class="workspace">'+filters+'<section class="card"><div class="card-head"><h2>'+esc(title)+'</h2><input id="query" class="search" type="search" aria-label="Поиск по фразам" placeholder="Поиск по фразам" value="'+esc(query)+'"></div><div id="rows">'+rowsMarkup(rows)+'</div></section></div>'+
     '<section class="card pad stack"><h2>Файлы сбора и очистки</h2><div class="files">'+files.map(([name,label],i)=>'<button type="button" class="file" data-action="csv-download" data-index="'+i+'"'+(data.files[i]===null?' disabled':'')+'><strong>'+label+'</strong><span>'+name+'</span></button>').join('')+'</div></section>':
     '<section class="card empty">'+(agentAvailable?'Запустите сбор в Wordstat или загрузите CSV из n8n.':'Запустите демонстрационный сбор или загрузите CSV из n8n.')+' Для кластеризации нужен <strong>05_final_clean.csv</strong>.</section>');
@@ -897,7 +1048,7 @@ function campaignPage(p){
     setting('Места показа',settings.placement)+setting('Стратегия',settings.strategy)+setting('Бюджет',budget)+
     setting('Регион из проекта',settings.region||'Все регионы')+
     (hasTemplate?setting('Шаблон',settings.campaignTemplate.name):'')+
-    setting('Группы и объявления',number(c.groups.length)+' / '+number(c.groups.length))+'</div>'+
+    setting('Группы и объявления',number(c.groups.length)+' / '+number(c.groups.length))+(c.workflowName?setting('Агент подготовки',c.workflowName):'')+'</div>'+
     '<details><summary>Расписание, минус-фразы, Метрика и UTM</summary><div class="params">'+
     setting('Расписание показов',settings.schedule)+setting('Общие минус-фразы',settings.negative.join(', ')||'Не заданы')+
     (settings.counter||settings.goal?setting('Счётчик Метрики',settings.counter||'Уточнить')+setting('Цель Метрики',settings.goal||'Уточнить'):'')+
@@ -962,7 +1113,7 @@ function safeReset(p,apply){
     });
 }
 function applyData(p,data){
-  p.data=data;p.clusters=[];
+  p.data=data;p.clusters=data?.demoClusters??[];
   if(project()===p){selectedCluster=0;selectedGroup=0;query='';}
   save();render();
 }
@@ -986,7 +1137,7 @@ function integrationsPage(){
   return head('Подключения','Настройте сбор семантики и передачу кампаний')+
     (local?'<div class="notice">Для подключения API запустите «Ключник» через приложение из меню «Пуск» или start.cmd.</div>':'')+
     '<div class="templates-grid">'+summary('n8n',agentAvailable?'Подключён':'Не подключён',
-      agentAvailable?'Воркфлоу: '+n8nStatus.name:'Сбор семантики и проверка релевантности в локальном n8n.','n8n-settings',agentAvailable)+
+      agentAvailable?'Семантика — '+n8nStatus.name+' · Кампания — '+(n8nStatus.campaignName||'не подключена'):'Сбор семантики и подготовка кампаний в локальном n8n.','n8n-settings',agentAvailable)+
     summary('Яндекс Директ',directConnection.available?'Подключён':'Не подключён',
       directConnection.available?(directConnection.login?'Клиент: '+directConnection.login:'Используется аккаунт владельца токена.'):
         'Создание кампании, групп, ключевых фраз и объявлений после подтверждения.','direct-settings',directConnection.available)+'</div>';
@@ -1090,9 +1241,12 @@ function openN8nSettings(){
   dialog.innerHTML='<form class="form"><h2 id="dialog-title">Подключение n8n</h2>'+
     field('url','Адрес n8n',n8nStatus.url||'http://127.0.0.1:5678','type="url" required')+
     field('key','API-ключ n8n','','type="password" required autocomplete="off"')+
-    field('name','Точное название воркфлоу',n8nStatus.name||'Kluchnik','required maxlength="128"')+
+    field('name','Воркфлоу семантики',n8nStatus.name||'Kluchnik','required maxlength="128"')+
+    field('campaignName','Воркфлоу кампании',n8nStatus.campaignName||'Kluchnik Campaign','maxlength="128"')+
+    '<label><input type="checkbox" name="createCampaign"'+(n8nStatus.campaignAvailable?'':' checked')+'> Создать воркфлоу кампании, если его ещё нет</label>'+
+    '<div id="campaign-token-setting" hidden>'+field('campaignToken','Токен X-Klyuchnik-Token вебхука кампании','','type="password" maxlength="4096" autocomplete="off"')+'</div>'+
     '<div id="folder-setting" hidden>'+field('folderId','Folder ID Yandex Cloud','','maxlength="128"')+'</div>'+
-    '<p class="muted smalltext">Ключ нужен для настройки. Приложение создаст служебную копию агента в вашем n8n.</p>'+
+    '<p class="muted smalltext">Один ключ n8n используется для настройки обоих воркфлоу. Оставьте название воркфлоу кампании пустым, чтобы готовить черновики локально.</p>'+
     '<p id="n8n-error" class="notice error" role="status" hidden></p>'+
     '<div class="actionbar">'+button('Закрыть','close-dialog')+'<button type="submit" class="btn primary">Подключить</button></div></form>';
   dialog.setAttribute('aria-labelledby','dialog-title');
@@ -1102,6 +1256,7 @@ function openN8nSettings(){
     const submit=form.querySelector('button[type="submit"]');
     const errorBox=form.querySelector('#n8n-error');
     const data=Object.fromEntries(new FormData(form));
+    data.createCampaign=form.elements.createCampaign.checked;
     submit.disabled=true;submit.textContent='Подключение…';errorBox.hidden=true;
     try{
       n8nStatus=await apiRequest('/api/semantics/connect',{method:'POST',
@@ -1109,13 +1264,17 @@ function openN8nSettings(){
       agentAvailable=n8nStatus.available;
       form.elements.key.value='';
       if(dialog.open&&dialog.contains(form))dialog.close();
-      render();notify('Агент n8n подключён.');
+      render();notify(n8nStatus.campaignAvailable?'Подключены оба воркфлоу n8n.':'Подключён воркфлоу семантики.');
     }catch(error){
       errorBox.textContent=error.message;errorBox.hidden=false;
       if(error.field==='folderId'){
         form.querySelector('#folder-setting').hidden=false;
         form.elements.folderId.required=true;
         form.elements.folderId.focus();
+      }
+      if(error.field==='campaignToken'){
+        form.querySelector('#campaign-token-setting').hidden=false;
+        form.elements.campaignToken.focus();
       }
     }finally{submit.disabled=false;submit.textContent='Подключить';}
   });
@@ -1228,10 +1387,10 @@ document.addEventListener('submit',event=>{
   if(event.target.id==='group-assign-form'){
     event.preventDefault();
     const p=project(), data=new FormData(event.target);
-    if(pendingGroupDraft?.projectId!==p.id||p.campaign)return;
+    if(pendingGroupDraft?.projectId!==p.id||p.campaign||campaignJob)return;
     const {projectId,...campaign}=pendingGroupDraft;
     campaign.groups.forEach((group,index)=>setGroupTemplate(group,data.get('group:'+index)));
-    p.campaign=campaign;selectedGroup=0;save();changePage('campaign');
+    void prepareCampaignDraft(p,campaign);
     return;
   }
   if(['template-form','group-template-form'].includes(event.target.id)){
@@ -1313,24 +1472,25 @@ document.addEventListener('click',event=>{
     case 'campaign-save-template': if(c)openTemplate(templateFromCampaign(c));break;
     case 'new': changePage('new');break;
     case 'open': state.active=id;selectedCluster=0;selectedGroup=0;save();changePage('semantics');break;
-    case 'n8n-settings': if(bridgeReady&&!agentJob)openN8nSettings();break;
+    case 'n8n-settings': if(bridgeReady&&!agentJob&&!campaignJob)openN8nSettings();break;
     case 'direct-settings': if(bridgeReady&&!pendingTransfer)openDirectSettings();break;
     case 'direct-verify': if(c&&bridgeReady)verifyCampaign(p);break;
     case 'direct-refresh': if(c?.directRequestId&&!pendingTransfer)void refreshDirectResult(p);break;
     case 'collect':
-      if(agentJob)break;
+      if(agentJob||campaignJob)break;
       if(agentAvailable){collectWordstat(p);break;}
       if(p.data?.kind==='import'&&!p.campaign){
         showDialog('Загрузить демоданные?','<p class="muted">Демоданные заменят импортированные результаты в этом проекте.</p>','Загрузить',()=>applyData(p,demoData(p)));
       }else safeReset(p,()=>applyData(p,demoData(p)));
       break;
-    case 'import': if(agentJob?.projectId!==p.id)q('#csv-input').click();break;
-    case 'cluster': p.clusters=cluster(p.data.result,p.masks);selectedCluster=0;query='';save();render();break;
+    case 'import': if(agentJob?.projectId!==p.id&&campaignJob?.projectId!==p.id)q('#csv-input').click();break;
+    case 'upgrade-demo': if(p.data?.kind==='demo'&&isKazanCeilingDemo(p)&&!agentJob&&!campaignJob)safeReset(p,()=>applyData(p,kazanCeilingDemo()));break;
+    case 'cluster': if(campaignJob?.projectId===p.id)break; p.clusters=clusterProject(p);selectedCluster=0;query='';save();render();break;
     case 'cluster-select': selectedCluster=Number(index);query='';render();break;
     case 'group-select': selectedGroup=Number(index);render();break;
     case 'csv-download': download(files[index][0],'\uFEFF'+p.data.files[index].replace(/^\uFEFF/,''),'text/csv;charset=utf-8');break;
     case 'generate':
-      if(p.clusters.length&&agentJob?.projectId!==p.id){
+      if(p.clusters.length&&agentJob?.projectId!==p.id&&!campaignJob){
         if(!c)chooseTemplate(p);else changePage('campaign');
       }
       break;
@@ -1338,7 +1498,7 @@ document.addEventListener('click',event=>{
     case 'campaign-goal': if(c&&['review','revision'].includes(c.status))editGoal(p);break;
     case 'campaign-clicks': if(c&&['review','revision'].includes(c.status))reviseDraft(p,{counter:'',goal:'',optimize:'clicks'});break;
     case 'change-region':
-      if(agentJob?.projectId===p.id)break;
+      if(agentJob?.projectId===p.id||campaignJob?.projectId===p.id)break;
       if(c?.directRequestId&&c.status!=='sent'){notify('Сначала проверьте результат отправки в Директ.');break;}
       if(c?.status==='sent'){notify('Для смены региона после передачи создайте другой проект.');break;}
       showDialog('Изменить регион проекта',
@@ -1426,6 +1586,12 @@ q('#csv-input').addEventListener('change',async event=>{
     });
   }catch(error){notify(error.message);}
 });
+const state=load();
+for(const p of state.projects){
+  if(p.data?.kind==='demo'&&!p.data.sample&&isKazanCeilingDemo(p)&&!p.campaign){
+    p.data=kazanCeilingDemo();p.clusters=clusterProject(p);
+  }
+}
 save();render();void connectAgent();
 </script>
 </body>

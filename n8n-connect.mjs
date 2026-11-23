@@ -4,6 +4,7 @@ import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 
 const template = JSON.parse(await readFile(new URL('./klyuchnik-n8n.json',import.meta.url),'utf8'));
+const campaignTemplate = JSON.parse(await readFile(new URL('./klyuchnik-campaign-n8n.json',import.meta.url),'utf8'));
 const configPath = process.env.KLYUCHNIK_CONFIG || join(process.env.LOCALAPPDATA || join(homedir(),'.config'),'Kluchnik','n8n.json');
 const loopback = new Set(['127.0.0.1','localhost','[::1]']);
 
@@ -24,7 +25,9 @@ export async function loadConnection(){
   try{
     const connection=JSON.parse(await readFile(configPath,'utf8'));
     if(typeof connection.token!=='string'||!/^[\x21-\x7e]+$/.test(connection.token))throw Error('Некорректный токен вебхука.');
-    return {...connection,webhook:localUrl(connection.webhook)};
+    const campaign=connection.campaign;
+    if(campaign&&(typeof campaign.token!=='string'||/[^\x21-\x7e]/.test(campaign.token)))throw Error('Некорректный токен вебхука кампании.');
+    return {...connection,webhook:localUrl(connection.webhook),...(campaign?{campaign:{...campaign,webhook:localUrl(campaign.webhook)}}:{})};
   }catch(error){
     if(error.code==='ENOENT')return null;
     throw error;
@@ -50,7 +53,7 @@ function createApi(base,key){
   };
 }
 
-async function findWorkflow(api,name){
+async function findWorkflow(api,name,optional=false){
   let cursor;
   const seen=new Set(), matches=[];
   do{
@@ -62,6 +65,7 @@ async function findWorkflow(api,name){
     seen.add(cursor);
   }while(cursor);
   if(matches.length>1)throw Error('В n8n несколько воркфлоу с таким именем. Переименуйте один из них.');
+  if(!matches.length&&optional)return null;
   if(!matches.length)throw Error('Воркфлоу «'+name+'» не найден. Скопируйте его полное название из n8n.');
   return api('/workflows/'+encodeURIComponent(matches[0].id));
 }
@@ -102,55 +106,99 @@ async function persist(connection){
   }
 }
 
+async function provisionWorkflow(api,base,name,pathPrefix,source,configure,rollback){
+  const suffix=randomBytes(8).toString('hex');
+  const token=randomBytes(32).toString('hex');
+  const path=pathPrefix+'-'+suffix;
+  const credential=await api('/credentials','POST',{
+    name:'Kluchnik · '+suffix,type:'httpHeaderAuth',data:{name:'X-Klyuchnik-Token',value:token}
+  });
+  const credentialId=credential?.id;
+  if(!credentialId)throw Error('API n8n не вернул ID созданного доступа вебхука.');
+  rollback.push(()=>api('/credentials/'+encodeURIComponent(credentialId),'DELETE'));
+  const {nodes,connections,settings}=structuredClone(source);
+  const trigger=nodes.find(node=>node.type==='n8n-nodes-base.webhook');
+  trigger.parameters.path=path;
+  delete trigger.webhookId;
+  trigger.credentials={httpHeaderAuth:{id:credentialId,name:credential.name||'Kluchnik · '+suffix}};
+  configure(nodes);
+  const created=await api('/workflows','POST',{name,nodes,connections,settings});
+  const workflowId=created?.id;
+  if(!workflowId)throw Error('API n8n не вернул ID созданного воркфлоу.');
+  const workflowPath='/workflows/'+encodeURIComponent(workflowId);
+  rollback.push(()=>api(workflowPath,'DELETE'));
+  await api(workflowPath+'/activate','POST');
+  return {name,workflowId,token,webhook:base+'/webhook/'+path};
+}
+
+async function connectCampaign(api,base,name,input,previous,agent,rollback){
+  if(!name)return null;
+  const workflow=await findWorkflow(api,name,true);
+  if(!workflow){
+    if(input.createCampaign!==true)throw Error('Воркфлоу кампании «'+name+'» не найден. Проверьте название или разрешите создать его.');
+    return provisionWorkflow(api,base,name,'klyuchnik-campaign',campaignTemplate,nodes=>{
+      nodes.find(node=>node.name==='Подготовить объявления Claude').credentials={anthropicApi:agent.credential};
+    },rollback);
+  }
+  const triggers=workflow.nodes?.filter(node=>node.type==='n8n-nodes-base.webhook'&&!node.disabled&&
+    node.parameters?.httpMethod==='POST')??[];
+  const trigger=triggers[0]?.parameters;
+  const path=trigger?.path;
+  if(triggers.length!==1||typeof path!=='string'||!/^[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)*$/.test(path)||
+      !['headerAuth','none',undefined].includes(trigger.authentication)){
+    throw Error('Воркфлоу кампании должен иметь один POST Webhook с постоянным путём и поддерживать Header Auth.');
+  }
+  const token=String(input.campaignToken??'').trim()||(previous?.workflowId===workflow.id?previous.token:'');
+  if(trigger.authentication==='headerAuth'&&!token){
+    const error=Error('Для существующего воркфлоу кампании введите значение заголовка X-Klyuchnik-Token.');
+    error.field='campaignToken';
+    throw error;
+  }
+  if(token.length>4096||/[^\x21-\x7e]/.test(token))throw Error('Проверьте значение заголовка X-Klyuchnik-Token.');
+  if(!workflow.active){
+    if(previous?.workflowId!==workflow.id)throw Error('Активируйте существующий воркфлоу кампании в n8n.');
+    await api('/workflows/'+encodeURIComponent(workflow.id)+'/activate','POST');
+  }
+  return {name,workflowId:workflow.id,token:trigger.authentication==='headerAuth'?token:'',webhook:base+'/webhook/'+path};
+}
+
 export async function connectN8n(input,previous){
   const base=localUrl(String(input?.url??'').trim());
   const key=String(input?.key??'').trim(), name=String(input?.name??'').trim();
-  if(!key||key.length>4096||!/^[\x21-\x7e]+$/.test(key)||!name||name.length>128)throw Error('Введите API-ключ n8n и точное название воркфлоу.');
+  const campaignName=String(input?.campaignName??'').trim();
+  if(!key||key.length>4096||!/^[\x21-\x7e]+$/.test(key)||!name||name.length>128)throw Error('Введите API-ключ n8n и точное название воркфлоу семантики.');
+  if(campaignName.length>128||campaignName===name)throw Error('Укажите отдельное название воркфлоу кампании.');
   const api=createApi(base,key);
   const source=await findWorkflow(api,name);
   const sameSource=previous?.base===base&&previous?.sourceId===source.id;
   const sourceVersion=source.versionId??source.updatedAt??null;
   const agent=extractAgent(source,String(input?.folderId??'').trim()||(sameSource?previous.folder:''));
-  if(sameSource&&previous.folder===agent.folder&&previous.sourceVersion===sourceVersion&&previous.workflowId){
-    const remotePath='/workflows/'+encodeURIComponent(previous.workflowId);
-    try{
-      const existing=await api(remotePath);
-      if(!existing.active)await api(remotePath+'/activate','POST');
-      if(previous.name!==name){previous={...previous,name};await persist(previous);}
-      return previous;
-    }catch(error){if(error.status!==404)throw error;}
-  }
-  const suffix=randomBytes(8).toString('hex');
-  const token=randomBytes(32).toString('hex');
-  const path='klyuchnik-semantics-'+suffix;
-  let credentialId,workflowId;
+  const rollback=[];
   try{
-    const credential=await api('/credentials','POST',{
-      name:'Kluchnik · '+suffix,type:'httpHeaderAuth',data:{name:'X-Klyuchnik-Token',value:token}
-    });
-    credentialId=credential?.id;
-    if(!credentialId)throw Error('API n8n не вернул ID созданного доступа вебхука.');
-    const {nodes,connections,settings}=structuredClone(template);
-    const trigger=nodes.find(node=>node.type==='n8n-nodes-base.webhook');
-    trigger.parameters.path=path;
-    delete trigger.webhookId;
-    trigger.credentials={httpHeaderAuth:{id:credentialId,name:credential.name||'Kluchnik · '+suffix}};
-    const params=nodes.find(node=>node.name==='Параметры Wordstat');
-    params.parameters.jsCode=params.parameters.jsCode.replace(/const folderId = [^;]+;/,()=> 'const folderId = '+JSON.stringify(agent.folder)+';');
-    const collector=nodes.find(node=>node.name==='Сбор Wordstat');
-    collector.parameters.jsCode=collector.parameters.jsCode.replace(/const apiKey = [^;]+;/,()=> 'const apiKey = '+JSON.stringify(agent.apiKey)+';');
-    const claude=nodes.find(node=>node.name==='Оценка релевантности Claude');
-    claude.credentials={anthropicApi:agent.credential};
-    const created=await api('/workflows','POST',{name:('Kluchnik · '+name+' · '+suffix).slice(0,128),nodes,connections,settings});
-    workflowId=created?.id;
-    if(!workflowId)throw Error('API n8n не вернул ID созданного воркфлоу.');
-    await api('/workflows/'+encodeURIComponent(workflowId)+'/activate','POST');
-    const connection={base,name,folder:agent.folder,sourceId:source.id,sourceVersion,workflowId,token,webhook:base+'/webhook/'+path};
+    let semantics;
+    if(sameSource&&previous.folder===agent.folder&&previous.sourceVersion===sourceVersion&&previous.workflowId){
+      const remotePath='/workflows/'+encodeURIComponent(previous.workflowId);
+      try{
+        const existing=await api(remotePath);
+        if(!existing.active)await api(remotePath+'/activate','POST');
+        semantics=previous;
+      }catch(error){if(error.status!==404)throw error;}
+    }
+    semantics??=await provisionWorkflow(api,base,('Kluchnik · '+name+' · '+randomBytes(4).toString('hex')).slice(0,128),
+      'klyuchnik-semantics',template,nodes=>{
+        const params=nodes.find(node=>node.name==='Параметры Wordstat');
+        params.parameters.jsCode=params.parameters.jsCode.replace(/const folderId = [^;]+;/,()=> 'const folderId = '+JSON.stringify(agent.folder)+';');
+        const collector=nodes.find(node=>node.name==='Сбор Wordstat');
+        collector.parameters.jsCode=collector.parameters.jsCode.replace(/const apiKey = [^;]+;/,()=> 'const apiKey = '+JSON.stringify(agent.apiKey)+';');
+        nodes.find(node=>node.name==='Оценка релевантности Claude').credentials={anthropicApi:agent.credential};
+      },rollback);
+    const campaign=await connectCampaign(api,base,campaignName,input,previous?.base===base?previous.campaign:null,agent,rollback);
+    const {workflowId,token,webhook}=semantics;
+    const connection={base,name,folder:agent.folder,sourceId:source.id,sourceVersion,workflowId,token,webhook,campaign};
     await persist(connection);
     return connection;
   }catch(error){
-    if(workflowId)await api('/workflows/'+encodeURIComponent(workflowId),'DELETE').catch(()=>{});
-    if(credentialId)await api('/credentials/'+encodeURIComponent(credentialId),'DELETE').catch(()=>{});
+    for(const undo of rollback.reverse())await undo().catch(()=>{});
     throw error;
   }
 }

@@ -45,25 +45,71 @@ function validateJob(input){
   return {masks:masks.map(mask=>mask.trim()),niche:niche.trim(),regions:[...new Set(regions)]};
 }
 
-async function run(job, input, {webhook,token}) {
+function connectionStatus(){
+  return {available:Boolean(connection),name:connection?.name??'',url:connection?.base??'',
+    campaignAvailable:Boolean(connection?.campaign),campaignName:connection?.campaign?.name??''};
+}
+
+async function callWorkflow({webhook,token},input,timeout){
+  let reply;
   try {
-    let reply;
-    try {
-      reply = await fetch(webhook, {
-        method:'POST', redirect:'error', signal:AbortSignal.timeout(15*60*1000),
-        headers:{'Content-Type':'application/json','X-Klyuchnik-Token':token},
-        body:JSON.stringify(input)
-      });
-    } catch (error) {
-      throw new Error(error.name==='TimeoutError'?'n8n не успел завершить сбор за 15 минут. Проверьте выполнение в n8n.':'Не удалось связаться с локальным n8n. Проверьте, что он запущен и Production URL верный.');
+    reply=await fetch(webhook,{
+      method:'POST',redirect:'error',signal:AbortSignal.timeout(timeout),
+      headers:{'Content-Type':'application/json',...(token?{'X-Klyuchnik-Token':token}:{})},
+      body:JSON.stringify(input)
+    });
+  }catch(error){
+    throw Error(error.name==='TimeoutError'?'n8n не успел завершить воркфлоу. Проверьте выполнение в n8n.':
+      'Не удалось связаться с локальным n8n. Проверьте, что он запущен.');
+  }
+  if(!reply.ok){
+    const hints={401:'Проверьте значение заголовка X-Klyuchnik-Token.',403:'Проверьте настройку Header Auth.',404:'Проверьте Production URL и активируйте воркфлоу.'};
+    throw Error('n8n ответил HTTP '+reply.status+'. '+(hints[reply.status]||'Откройте последнее выполнение воркфлоу в n8n, чтобы увидеть причину.'));
+  }
+  let result;
+  try{result=await reply.json();}catch{throw Error('n8n вернул ответ без JSON. Проверьте настройки воркфлоу.');}
+  return Array.isArray(result)?result[0]:result;
+}
+
+function campaignInput(input){
+  if(!input?.project||!input.settings||!Array.isArray(input.groups)||!input.groups.length||input.groups.length>100){
+    throw Error('Для подготовки кампании передайте данные проекта и от 1 до 100 групп.');
+  }
+  let total=0;
+  const ids=new Set();
+  for(const group of input.groups){
+    if(typeof group?.id!=='string'||ids.has(group.id)||typeof group.name!=='string'||!group.name.trim()||
+        !Array.isArray(group.keywords)||!group.keywords.length||
+        group.keywords.some(phrase=>typeof phrase!=='string'||!phrase.trim()||phrase.length>1000)){
+      throw Error('В воркфлоу кампании нужны уникальные ID групп, названия и ключевые фразы.');
     }
-    if (!reply.ok) {
-      const hints = {401:'Проверьте значение заголовка X-Klyuchnik-Token.',403:'Проверьте настройку Header Auth.',404:'Проверьте Production URL и активируйте воркфлоу.'};
-      throw new Error('n8n ответил HTTP '+reply.status+'. '+(hints[reply.status]||'Откройте последнее выполнение воркфлоу в n8n, чтобы увидеть причину.'));
+    ids.add(group.id);
+    total+=group.keywords.length;
+  }
+  if(total>20000)throw Error('Агент кампании принимает до 20 000 фраз за раз.');
+  return {...input,action:'prepare-campaign',version:1};
+}
+
+function campaignOutput(result,expected){
+  if(result?.version!==1||!Array.isArray(result.groups)||result.groups.length!==expected.groups.length){
+    throw Error('Воркфлоу кампании должен вернуть JSON версии 1 с результатом для каждой группы.');
+  }
+  const ids=new Set(expected.groups.map(group=>group.id));
+  const read=(value,max)=>typeof value==='string'&&value.trim()&&value.trim().length<=max&&!/[\u0000-\u001f\u007f]/.test(value.trim());
+  const groups=result.groups.map(group=>{
+    if(!ids.delete(group?.id)||!read(group.title,56)||!read(group.description,81)||!Array.isArray(group.negative)||
+        group.negative.length>12||group.negative.some(phrase=>!read(phrase,100))){
+      throw Error('Воркфлоу вернул некорректное объявление или минус-фразы. Проверьте последнее выполнение в n8n.');
     }
-    let result;
-    try { result=await reply.json(); } catch { throw new Error('n8n вернул ответ без JSON. Проверьте, что вызван воркфлоу для «Ключника».'); }
-    if (Array.isArray(result)) result=result[0];
+    return {id:group.id,title:group.title.trim(),description:group.description.trim(),
+      negative:[...new Set(group.negative.map(phrase=>phrase.trim()))]};
+  });
+  return {groups};
+}
+
+async function run(job,input,target) {
+  try {
+    const result=await callWorkflow(target,input,15*60*1000);
     if (!requiredFiles.every(name=>typeof result?.files?.[name]==='string')) {
       throw new Error('n8n завершился без полного набора из пяти CSV. Проверьте воркфлоу и его последнее выполнение.');
     }
@@ -87,9 +133,9 @@ const server = http.createServer(async (req,res)=>{
     res.end(html);return;
   }
   if (req.method==='GET' && path==='/api/semantics/status') {
-    json(res,200,{available:Boolean(connection),name:connection?.name??'',url:connection?.base??''});return;
+    json(res,200,connectionStatus());return;
   }
-  if(req.method==='POST'&&(path==='/api/semantics/jobs'||path==='/api/semantics/connect'||path==='/api/metrika/goals'||path.startsWith('/api/direct/'))&&
+  if(req.method==='POST'&&(path==='/api/semantics/jobs'||path==='/api/semantics/connect'||path==='/api/campaign/prepare'||path==='/api/metrika/goals'||path.startsWith('/api/direct/'))&&
       (req.headers.origin!==origin||!/^application\/json(?:;|$)/i.test(req.headers['content-type']||''))){
     json(res,403,{message:'Откройте настройки в окне «Ключника».'});return;
   }
@@ -123,9 +169,21 @@ const server = http.createServer(async (req,res)=>{
     configuring=true;
     try{
       connection=await connectN8n(await bodyOf(req),connection);
-      json(res,200,{available:true,name:connection.name,url:connection.base});
+      json(res,200,connectionStatus());
     }catch(error){json(res,400,{message:error.message,field:error.field});}
     finally{configuring=false;}
+    return;
+  }
+  if(req.method==='POST'&&path==='/api/campaign/prepare'){
+    if(!connection?.campaign){json(res,409,{message:'Сначала подключите воркфлоу кампании в настройках n8n.'});return;}
+    if(configuring||busy){json(res,409,{message:'Дождитесь завершения текущего действия n8n.'});return;}
+    busy=true;
+    try{
+      const input=campaignInput(await bodyOf(req,4*1024*1024));
+      const result=await callWorkflow(connection.campaign,input,4*60*1000);
+      json(res,200,campaignOutput(result,input));
+    }catch(error){json(res,400,{message:error.message});}
+    finally{busy=false;}
     return;
   }
   if (req.method==='POST' && path==='/api/semantics/jobs') {

@@ -17,10 +17,10 @@ InstallDir "$LOCALAPPDATA\Kluchnik\app"
 InstallDirRegKey HKCU "Software\Kluchnik" "InstallDir"
 RequestExecutionLevel user
 SetCompressor /SOLID lzma
-VIProductVersion "0.2.0.0"
+VIProductVersion "0.2.2.0"
 VIAddVersionKey "ProductName" "Ключник"
 VIAddVersionKey "FileDescription" "Kluchnik Windows Setup"
-VIAddVersionKey "FileVersion" "0.2.0"
+VIAddVersionKey "FileVersion" "0.2.2"
 VIAddVersionKey "OriginalFilename" "Kluchnik-Setup.exe"
 
 !define MUI_ABORTWARNING
@@ -59,6 +59,7 @@ Section "Ключник" SecApp
   File "${INPUT}/klyuchnik-wordstat.html"
   File "${INPUT}/klyuchnik-server.mjs"
   File "${INPUT}/klyuchnik-n8n.json"
+  File "${INPUT}/klyuchnik-campaign-n8n.json"
   File "${INPUT}/n8n-connect.mjs"
   File "${INPUT}/metrika.mjs"
   File "${INPUT}/direct.mjs"
@@ -70,7 +71,7 @@ Section "Ключник" SecApp
   WriteUninstaller "$INSTDIR\uninstall.exe"
   WriteRegStr HKCU "Software\Kluchnik" "InstallDir" "$INSTDIR"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Kluchnik" "DisplayName" "Ключник"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Kluchnik" "DisplayVersion" "0.2.0"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Kluchnik" "DisplayVersion" "0.2.2"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Kluchnik" "InstallLocation" "$INSTDIR"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Kluchnik" "UninstallString" '"$INSTDIR\uninstall.exe"'
   WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Kluchnik" "NoModify" 1
@@ -89,6 +90,7 @@ Section "Uninstall"
   Delete "$INSTDIR\klyuchnik-wordstat.html"
   Delete "$INSTDIR\klyuchnik-server.mjs"
   Delete "$INSTDIR\klyuchnik-n8n.json"
+  Delete "$INSTDIR\klyuchnik-campaign-n8n.json"
   Delete "$INSTDIR\n8n-connect.mjs"
   Delete "$INSTDIR\metrika.mjs"
   Delete "$INSTDIR\direct.mjs"
